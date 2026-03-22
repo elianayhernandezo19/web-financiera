@@ -1,0 +1,59 @@
+@use '../../../../../../scss/variables' as *;
+@use '../../../../../../scss/mixins' as *;
+
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.control-panel__group {
+  // wrapper para cada selector
+}
+
+.control-panel__label {
+  @include form-label;
+}
+
+.control-panel__select-wrap {
+  position: relative;
+}
+
+.control-panel__select {
+  @include styled-select;
+}
+
+.control-panel__chevron {
+  pointer-events: none;
+  position: absolute;
+  inset: 0 0.75rem 0 auto;
+  display: flex;
+  align-items: center;
+
+  svg {
+    height: 1rem;
+    width: 1rem;
+    color: $gray-400;
+  }
+}
+
+.control-panel__divider {
+  border: none;
+  border-top: 1px solid $gray-100;
+  :host-context(.dark) & { border-color: rgba(255, 255, 255, 0.05); }
+}
+
+.control-panel__btn {
+  @include btn-primary;
+}
+
+.btn__icon {
+  height: 1rem;
+  width: 1rem;
+  flex-shrink: 0;
+  transition: transform $transition-fast;
+}
+
+.control-panel__btn:hover:not(:disabled) .btn__icon--play {
+  transform: scale(1.1);
+}

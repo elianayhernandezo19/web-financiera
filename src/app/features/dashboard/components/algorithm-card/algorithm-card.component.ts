@@ -9,6 +9,7 @@ import { AlgorithmInfo } from '../../../../core/models/algorithm.model';
   selector: 'app-algorithm-card',
   imports: [],
   templateUrl: './algorithm-card.component.html',
+  styleUrl: './algorithm-card.component.scss',
 })
 export class AlgorithmCardComponent {
   readonly algorithm = input.required<AlgorithmInfo>();

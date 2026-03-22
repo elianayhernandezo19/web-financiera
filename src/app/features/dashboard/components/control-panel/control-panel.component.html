@@ -1,36 +1,25 @@
-<div class="flex flex-col gap-5">
+<div class="control-panel">
 
-  <!-- ── Selector de Activo Financiero ── -->
-  <div>
-    <label
-      for="assetSelect"
-      class="block text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-[0.15em] mb-2"
-    >
+  <!-- ── Selector de Activo ── -->
+  <div class="control-panel__group">
+    <label for="assetSelect" class="control-panel__label">
       Activo Financiero
     </label>
-    <div class="relative">
+    <div class="control-panel__select-wrap">
       <select
         id="assetSelect"
+        class="control-panel__select"
         [value]="selectedAssetId()"
         (change)="onAssetChange($event)"
-        class="w-full appearance-none cursor-pointer
-               bg-gray-100/70 dark:bg-white/[0.04]
-               border border-gray-200 dark:border-white/[0.08]
-               text-gray-800 dark:text-gray-200
-               rounded-xl px-4 py-3 pr-10 text-sm font-medium
-               transition-all duration-200
-               focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/40
-               hover:border-gray-300 dark:hover:border-white/20"
       >
         @for (asset of assets(); track asset.id) {
-          <option [value]="asset.id" class="bg-white dark:bg-slate-800">
+          <option [value]="asset.id">
             {{ asset.ticker }} — {{ asset.name }}
           </option>
         }
       </select>
-      <!-- Ícono chevron custom -->
-      <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+      <span class="control-panel__chevron">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
         </svg>
       </span>
@@ -38,69 +27,47 @@
   </div>
 
   <!-- ── Selector de Algoritmo ── -->
-  <div>
-    <label
-      for="algorithmSelect"
-      class="block text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-[0.15em] mb-2"
-    >
+  <div class="control-panel__group">
+    <label for="algorithmSelect" class="control-panel__label">
       Algoritmo de Ordenamiento
     </label>
-    <div class="relative">
+    <div class="control-panel__select-wrap">
       <select
         id="algorithmSelect"
+        class="control-panel__select"
         [value]="selectedAlgorithmId()"
         (change)="onAlgorithmChange($event)"
-        class="w-full appearance-none cursor-pointer
-               bg-gray-100/70 dark:bg-white/[0.04]
-               border border-gray-200 dark:border-white/[0.08]
-               text-gray-800 dark:text-gray-200
-               rounded-xl px-4 py-3 pr-10 text-sm font-medium
-               transition-all duration-200
-               focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/40
-               hover:border-gray-300 dark:hover:border-white/20"
       >
         @for (algo of algorithms(); track algo.id) {
-          <option [value]="algo.id" class="bg-white dark:bg-slate-800">{{ algo.name }}</option>
+          <option [value]="algo.id">{{ algo.name }}</option>
         }
       </select>
-      <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+      <span class="control-panel__chevron">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
         </svg>
       </span>
     </div>
   </div>
 
-  <!-- ── Divisor visual ── -->
-  <div class="border-t border-gray-100 dark:border-white/[0.05]"></div>
+  <!-- Divisor -->
+  <div class="control-panel__divider"></div>
 
-  <!-- ── Botón de ejecución ── -->
+  <!-- Botón de ejecución -->
   <button
+    class="control-panel__btn"
     (click)="onExecute()"
     [disabled]="isLoading()"
-    class="group inline-flex items-center justify-center gap-2.5 w-full
-           bg-gradient-to-r from-brand-600 to-brand-500
-           hover:from-brand-500 hover:to-brand-400
-           active:scale-[0.98]
-           disabled:from-gray-200 disabled:to-gray-200
-           dark:disabled:from-gray-700/60 dark:disabled:to-gray-700/60
-           disabled:text-gray-400 dark:disabled:text-gray-500
-           disabled:cursor-not-allowed disabled:shadow-none disabled:scale-100
-           text-white font-semibold text-sm px-6 py-3.5 rounded-xl
-           shadow-lg shadow-brand-600/25 hover:shadow-brand-500/35
-           transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-brand-500/60
-           focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-950"
     [class.animate-glow-pulse]="isLoading()"
   >
     @if (isLoading()) {
-      <svg class="animate-spin h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+      <svg class="btn__icon animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+        <circle style="opacity: 0.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path style="opacity: 0.75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
       </svg>
       Ejecutando…
     } @else {
-      <svg class="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-150" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+      <svg class="btn__icon btn__icon--play" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
         <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
       </svg>
       Ejecutar Ordenamiento

@@ -1,132 +1,77 @@
 <!--
-  Shell principal de la aplicación.
-  Estructura: Navbar fija + <main> con router-outlet + Footer.
+  Shell principal — Navbar fija + <main> + Footer.
+  Estilos en app.scss (sin Tailwind).
 -->
-<div class="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
+<div class="app-shell">
 
-  <!--
-    Degradado ambiental radial (sólo visible en dark mode).
-    Simula un "glow" proveniente del borde superior — estilo Bloomberg/Vercel.
-  -->
-  <div
-    class="pointer-events-none fixed inset-0 z-0
-           dark:[background:radial-gradient(ellipse_80%_40%_at_50%_-5%,rgba(16,185,129,0.07),transparent)]"
-    aria-hidden="true"
-  ></div>
+  <!-- Degradado ambiental (dark mode glow) -->
+  <div class="ambient-glow" aria-hidden="true"></div>
 
-  <!-- ════════════════════════ NAVBAR FIJA ════════════════════════ -->
-  <header
-    class="fixed inset-x-0 top-0 z-50 h-16
-           bg-white/85 dark:bg-slate-950/85
-           backdrop-blur-xl
-           border-b border-gray-200/60 dark:border-white/[0.06]
-           shadow-[0_1px_0_0_rgba(0,0,0,0.04)] dark:shadow-none
-           transition-colors duration-300"
-  >
-    <div class="max-w-screen-2xl mx-auto h-full px-4 sm:px-6 flex items-center justify-between gap-4">
+  <!-- ════════════════ NAVBAR ════════════════ -->
+  <header class="navbar">
+    <div class="navbar__inner">
 
-      <!-- ── Izquierda: Logo + Título ── -->
-      <div class="flex items-center gap-3 min-w-0 flex-shrink-0">
-        <!-- Ícono con glow esmeralda sutil -->
-        <div
-          class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl
-                 bg-brand-500/10 dark:bg-brand-400/[0.08]
-                 ring-1 ring-brand-500/25 dark:ring-brand-400/20
-                 dark:shadow-[0_0_14px_rgba(16,185,129,0.18)]
-                 transition-all duration-300"
-        >
-          <svg
-            class="h-5 w-5 text-brand-600 dark:text-brand-400"
-            fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              stroke-linecap="round" stroke-linejoin="round"
-              d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
-            />
+      <!-- Logo + Título -->
+      <div class="navbar__logo">
+        <div class="navbar__icon-box">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/>
           </svg>
         </div>
-
-        <div class="min-w-0">
-          <p class="text-[13px] font-bold leading-tight text-gray-900 dark:text-white truncate">
+        <div class="navbar__title">
+          <p class="navbar__name">
             AlgoFinance
-            <span class="text-brand-600 dark:text-brand-400">· UQ</span>
+            <span class="navbar__name-accent">· UQ</span>
           </p>
-          <p class="hidden sm:block text-[11px] leading-tight text-gray-400 dark:text-gray-500 truncate">
+          <p class="navbar__subtitle">
             Análisis de Algoritmos Financieros — Fase 2
           </p>
         </div>
       </div>
 
-      <!-- ── Centro: Badges de autores (md+) ── -->
-      <div class="hidden md:flex items-center gap-2 flex-1 justify-center">
+      <!-- Badges de autores (md+) -->
+      <div class="navbar__authors">
         @for (author of authors; track author) {
-          <span
-            class="inline-flex items-center gap-1.5 rounded-full pl-2 pr-3 py-1
-                   bg-gray-100 dark:bg-white/[0.04]
-                   ring-1 ring-gray-200/80 dark:ring-white/[0.07]
-                   text-xs font-medium text-gray-600 dark:text-gray-400
-                   hover:ring-brand-500/30 transition-all duration-200"
-          >
-            <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-500"></span>
+          <span class="author-badge">
+            <span class="author-badge__dot"></span>
             {{ author }}
           </span>
         }
       </div>
 
-      <!-- ── Derecha: Etiqueta de modo + Toggle ── -->
-      <div class="flex items-center gap-3 flex-shrink-0">
-        <span class="hidden sm:block text-xs font-medium text-gray-400 dark:text-gray-500 select-none w-8 text-right">
+      <!-- Toggle Dark/Light -->
+      <div class="navbar__right">
+        <span class="theme-label">
           {{ theme.isDark() ? 'Dark' : 'Light' }}
         </span>
 
-        <!--
-          Toggle Dark/Light.
-          El thumb se desplaza con [style.left] reactivo al signal isDark().
-        -->
         <button
+          class="theme-toggle"
           (click)="theme.toggle()"
           role="switch"
           [attr.aria-checked]="theme.isDark()"
           [attr.aria-label]="theme.isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
-          class="relative flex h-7 w-14 cursor-pointer items-center rounded-full
-                 bg-slate-200 dark:bg-slate-700/80
-                 ring-1 ring-slate-300/80 dark:ring-white/10
-                 transition-all duration-300
-                 hover:ring-brand-500/50
-                 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2
-                 focus:ring-offset-white dark:focus:ring-offset-slate-950"
         >
-          <!-- Ícono sol (izquierda) -->
-          <span class="absolute left-1.5 flex items-center pointer-events-none">
-            <svg
-              class="h-3.5 w-3.5 transition-opacity duration-300"
-              [class.opacity-80]="!theme.isDark()" [class.opacity-20]="theme.isDark()"
-              fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"
-              style="color: #f59e0b"
-            >
+          <!-- Sol -->
+          <span class="theme-toggle__icon theme-toggle__icon--sun">
+            <svg [class.opacity-80]="!theme.isDark()" [class.opacity-20]="theme.isDark()"
+              fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 5.404a.75.75 0 10-1.06-1.06l-1.061 1.06a.75.75 0 001.06 1.06l1.061-1.06zM6.464 14.596a.75.75 0 10-1.06-1.06l-1.061 1.06a.75.75 0 001.06 1.061l1.061-1.061zM18 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0118 10zM5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 015 10zM14.596 15.657a.75.75 0 001.06-1.06l-1.06-1.061a.75.75 0 10-1.06 1.06l1.06 1.061zM5.404 6.464a.75.75 0 001.06-1.06L5.404 4.343a.75.75 0 00-1.06 1.06l1.06 1.061z"/>
             </svg>
           </span>
 
-          <!-- Ícono luna (derecha) -->
-          <span class="absolute right-1.5 flex items-center pointer-events-none">
-            <svg
-              class="h-3.5 w-3.5 transition-opacity duration-300"
-              [class.opacity-80]="theme.isDark()" [class.opacity-20]="!theme.isDark()"
-              fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"
-              style="color: #93c5fd"
-            >
+          <!-- Luna -->
+          <span class="theme-toggle__icon theme-toggle__icon--moon">
+            <svg [class.opacity-80]="theme.isDark()" [class.opacity-20]="!theme.isDark()"
+              fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path fill-rule="evenodd" d="M7.455 2.004a.75.75 0 01.26.77 7 7 0 009.958 7.967.75.75 0 011.067.853A8.5 8.5 0 116.647 1.921a.75.75 0 01.808.083z" clip-rule="evenodd"/>
             </svg>
           </span>
 
-          <!-- Thumb deslizante -->
+          <!-- Thumb -->
           <span
-            class="absolute top-1 h-5 w-5 rounded-full
-                   bg-white dark:bg-slate-200
-                   shadow-md shadow-black/20
-                   transition-all duration-300 ease-in-out"
+            class="theme-toggle__thumb"
             [style.left]="theme.isDark() ? '29px' : '4px'"
           ></span>
         </button>
@@ -134,45 +79,38 @@
 
     </div>
   </header>
-  <!-- ════════════════════════ FIN NAVBAR ════════════════════════ -->
 
-  <!-- Contenido principal: padding-top para compensar el navbar fijo -->
-  <main class="relative z-10 pt-16">
+  <!-- Contenido principal -->
+  <main class="main-content">
     <router-outlet />
   </main>
 
-  <!-- ════════════════════════ FOOTER ════════════════════════ -->
-  <footer
-    class="relative z-10 border-t border-gray-200/60 dark:border-white/[0.05]
-           bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm
-           transition-colors duration-300"
-  >
-    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+  <!-- ════════════════ FOOTER ════════════════ -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__content">
 
-        <!-- Info del proyecto -->
-        <div class="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-600">
-          <svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342"/>
+        <div class="footer__info">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342"/>
           </svg>
           <span>
-            <span class="font-medium text-gray-500 dark:text-gray-500">Universidad del Quindío</span>
-            · Programa de Ingeniería de Sistemas · Análisis de Algoritmos
+            <span class="footer__info-uni">Universidad del Quindío</span>
+            · Ingeniería de Sistemas · Análisis de Algoritmos
           </span>
         </div>
 
-        <!-- Créditos -->
-        <div class="flex items-center gap-3">
-          <!-- Mobile: autores visibles en footer -->
-          <div class="flex md:hidden items-center gap-1.5 text-[10px] text-gray-400 dark:text-gray-600">
+        <div class="footer__credits">
+          <div class="footer__authors-mobile">
             @for (author of authors; track author; let last = $last) {
-              <span class="font-medium">{{ author }}</span>
+              <span>{{ author }}</span>
               @if (!last) {
-                <span class="text-gray-300 dark:text-gray-700">·</span>
+                <span class="footer__dot">·</span>
               }
             }
           </div>
-          <span class="text-[10px] text-gray-300 dark:text-gray-700 tabular-nums">2025</span>
+          <span class="footer__year">2025</span>
         </div>
 
       </div>

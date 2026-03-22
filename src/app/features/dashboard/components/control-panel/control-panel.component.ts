@@ -13,6 +13,7 @@ import { FinancialAsset } from '../../../../core/models/asset.model';
   selector: 'app-control-panel',
   imports: [FormsModule],
   templateUrl: './control-panel.component.html',
+  styleUrl: './control-panel.component.scss',
 })
 export class ControlPanelComponent {
   // ── Inputs ──

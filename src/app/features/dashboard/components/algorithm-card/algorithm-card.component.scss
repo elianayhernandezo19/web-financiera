@@ -1,0 +1,166 @@
+@use '../../../../../../scss/variables' as *;
+@use '../../../../../../scss/mixins' as *;
+
+// ═══════════════════════════════════════════════════════════════
+// Algorithm Card — ficha técnica Big O
+// ═══════════════════════════════════════════════════════════════
+
+.algo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// ── Hero Big O ──
+.algo-card__hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: $radius-2xl;
+  background: linear-gradient(135deg, rgba($brand-500, 0.07), rgba($brand-600, 0.02));
+  border: 1px solid rgba($brand-500, 0.1);
+  padding: 1.25rem;
+  text-align: center;
+
+  :host-context(.dark) & {
+    background: linear-gradient(135deg, rgba($brand-400, 0.09), rgba($brand-600, 0.01));
+    border-color: rgba($brand-400, 0.1);
+  }
+}
+
+.algo-card__hero-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 60%, rgba($brand-500, 0.07), transparent 70%);
+}
+
+.algo-card__hero-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.5rem;
+  color: $brand-600;
+
+  :host-context(.dark) & { color: $brand-500; }
+}
+
+.algo-card__hero-value {
+  position: relative;
+  font-family: $font-mono;
+  font-weight: 900;
+  font-size: $text-4xl;
+  letter-spacing: -0.02em;
+  color: $brand-600;
+  @include glow-text;
+
+  @include md { font-size: $text-5xl; }
+
+  :host-context(.dark) & { color: $brand-400; }
+}
+
+// ── Description ──
+.algo-card__description {
+  font-size: $text-sm;
+  line-height: 1.7;
+  color: $gray-500;
+
+  :host-context(.dark) & { color: $gray-400; }
+}
+
+// ── Complexity grid ──
+.algo-card__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.algo-card__cell {
+  border-radius: $radius-xl;
+  border: 1px solid $gray-100;
+  background: $gray-50;
+  padding: 0.75rem;
+
+  :host-context(.dark) & {
+    border-color: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+  }
+}
+
+.algo-card__cell-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 0.375rem;
+  color: $gray-400;
+}
+
+.algo-card__cell-value {
+  font-family: $font-mono;
+  font-weight: 700;
+  font-size: $text-sm;
+
+  &--best {
+    color: $brand-600;
+    :host-context(.dark) & { color: $brand-400; }
+  }
+  &--average {
+    color: $amber-500;
+    :host-context(.dark) & { color: $amber-400; }
+  }
+  &--worst {
+    color: $red-500;
+    :host-context(.dark) & { color: $red-400; }
+  }
+  &--space {
+    color: $blue-500;
+    :host-context(.dark) & { color: $blue-400; }
+  }
+}
+
+// ── Stability badge ──
+.algo-card__badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0.375rem;
+  border-radius: $radius-full;
+  padding: 0.375rem 0.75rem;
+  font-size: $text-xs;
+  font-weight: 500;
+
+  &--stable {
+    background: rgba($brand-500, 0.05);
+    color: $brand-700;
+    box-shadow: inset 0 0 0 1px rgba($brand-500, 0.15);
+
+    :host-context(.dark) & {
+      background: rgba($brand-400, 0.08);
+      color: $brand-400;
+      box-shadow: inset 0 0 0 1px rgba($brand-400, 0.2);
+    }
+  }
+
+  &--unstable {
+    background: rgba($red-500, 0.05);
+    color: $red-700;
+    box-shadow: inset 0 0 0 1px rgba($red-500, 0.15);
+
+    :host-context(.dark) & {
+      background: rgba($red-400, 0.08);
+      color: $red-400;
+      box-shadow: inset 0 0 0 1px rgba($red-400, 0.2);
+    }
+  }
+}
+
+.algo-card__badge-dot {
+  height: 0.375rem;
+  width: 0.375rem;
+  flex-shrink: 0;
+  border-radius: $radius-full;
+
+  .algo-card__badge--stable & { background: $brand-500; }
+  .algo-card__badge--unstable & { background: $red-500; }
+}

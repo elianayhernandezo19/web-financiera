@@ -1,4 +1,297 @@
-// La clase utilitaria `.section-title` se define aquí como única excepción
-// al uso de Tailwind directo en el template, dado que se repite 4 veces en
-// el mismo componente. En un proyecto real iría en styles.scss como @layer components.
-// El resto del estialdo usa clases Tailwind directamente en el HTML.
+@use '../../../../scss/variables' as *;
+@use '../../../../scss/mixins' as *;
+
+// ═══════════════════════════════════════════════════════════════
+// Dashboard — layout principal, métricas, grid
+// ═══════════════════════════════════════════════════════════════
+
+.dashboard {
+  min-height: 100vh;
+  padding: 1rem;
+  transition: background-color $transition-smooth;
+
+  @include sm { padding: 1.5rem; }
+  @include lg { padding: 2rem; }
+}
+
+.dashboard__container {
+  position: relative;
+  max-width: 1536px;
+  margin: 0 auto;
+}
+
+// ── Barra de métricas ──
+.metrics-bar {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.metrics-bar__left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+
+  @include sm { gap: 1.75rem; }
+}
+
+.metric {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.metric__icon {
+  display: flex;
+  height: 1.75rem;
+  width: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-lg;
+
+  svg {
+    height: 0.875rem;
+    width: 0.875rem;
+  }
+
+  &--default {
+    background: $gray-100;
+    box-shadow: inset 0 0 0 1px $gray-200;
+
+    :host-context(.dark) & {
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: inset 0 0 0 1px $border-dark;
+    }
+
+    svg {
+      color: $gray-400;
+      :host-context(.dark) & { color: $gray-500; }
+    }
+  }
+
+  &--brand {
+    background: rgba($brand-500, 0.1);
+    box-shadow: inset 0 0 0 1px rgba($brand-500, 0.2);
+    position: relative;
+
+    :host-context(.dark) & {
+      background: rgba($brand-400, 0.08);
+      box-shadow: inset 0 0 0 1px rgba($brand-400, 0.15);
+    }
+
+    svg {
+      color: $brand-600;
+      :host-context(.dark) & { color: $brand-400; }
+    }
+  }
+}
+
+.metric__label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  margin-bottom: 0.125rem;
+  color: $gray-400;
+
+  :host-context(.dark) & { color: $gray-600; }
+}
+
+.metric__value {
+  font-size: $text-lg;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: $gray-800;
+
+  :host-context(.dark) & { color: #fff; }
+
+  &--brand {
+    color: $brand-600;
+    :host-context(.dark) & { color: $brand-400; }
+  }
+
+  &--sm {
+    font-size: $text-sm;
+  }
+}
+
+.metric__unit {
+  font-size: $text-xs;
+  font-weight: 400;
+  color: $gray-400;
+  margin-left: 0.125rem;
+
+  :host-context(.dark) & { color: $gray-600; }
+}
+
+.metric__sub {
+  font-size: $text-xs;
+  font-weight: 400;
+  color: $gray-400;
+  margin-left: 0.125rem;
+
+  :host-context(.dark) & { color: $gray-500; }
+}
+
+// ── Pulse indicator ──
+.pulse-indicator {
+  position: absolute;
+  top: -0.125rem;
+  right: -0.125rem;
+  display: flex;
+  height: 0.5rem;
+  width: 0.5rem;
+}
+
+.pulse-indicator__ping {
+  position: absolute;
+  display: inline-flex;
+  height: 100%;
+  width: 100%;
+  border-radius: $radius-full;
+  background: $brand-500;
+  opacity: 0.6;
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.pulse-indicator__dot {
+  position: relative;
+  display: inline-flex;
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: $radius-full;
+  background: $brand-500;
+}
+
+// ── Clear button ──
+.btn-clear {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: $text-xs;
+  color: $gray-400;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color $transition-base;
+
+  :host-context(.dark) & { color: $gray-600; }
+
+  &:hover {
+    color: $red-500;
+    :host-context(.dark) & { color: $red-400; }
+
+    svg { transform: rotate(90deg); }
+  }
+
+  svg {
+    height: 0.875rem;
+    width: 0.875rem;
+    transition: transform $transition-base;
+  }
+}
+
+// ── Error alert ──
+.error-alert {
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: $red-700;
+  border-radius: $radius-xl;
+  padding: 1rem;
+  font-size: $text-sm;
+
+  :host-context(.dark) & {
+    background: rgba(127, 29, 29, 0.4);
+    border-color: rgba(153, 27, 27, 0.5);
+    color: #fca5a5;
+  }
+
+  svg {
+    height: 1.25rem;
+    width: 1.25rem;
+    color: $red-500;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+}
+
+// ── Main grid ──
+.dashboard-grid {
+  @include dashboard-grid;
+}
+
+.dashboard-grid__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dashboard-grid__main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// ── Glass card sections ──
+.card {
+  @include glass-card;
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  @include section-title;
+}
+
+.section-title--inline {
+  @include section-title;
+  margin-bottom: 0;
+}
+
+.card__count {
+  font-size: 10px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: $gray-400;
+
+  :host-context(.dark) & { color: $gray-600; }
+
+  &--brand {
+    font-weight: 600;
+    color: $brand-600;
+    :host-context(.dark) & { color: $brand-400; }
+  }
+}
+
+.algo-name {
+  font-size: $text-sm;
+  font-weight: 700;
+  color: $gray-800;
+  margin-bottom: 1rem;
+  @include truncate;
+
+  :host-context(.dark) & { color: #fff; }
+}
+
+// ── Stagger animation ──
+.stagger-0 { animation: fade-in-up 0.4s ease-out both; animation-delay: 0ms; }
+.stagger-1 { animation: fade-in-up 0.4s ease-out both; animation-delay: 80ms; }
+.stagger-2 { animation: fade-in-up 0.4s ease-out both; animation-delay: 120ms; }
+.stagger-3 { animation: fade-in-up 0.4s ease-out both; animation-delay: 180ms; }
+
+// Flex fill
+.flex-fill { flex: 1; }
