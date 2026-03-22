@@ -1,7 +1,8 @@
-import { Component, input, computed } from '@angular/core';
+import { Component, input, computed, inject } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { ExecutionEntry } from '../../../../core/models/sort-result.model';
+import { ThemeService } from '../../../../core/services/theme.service';
 
 /** Paleta de colores para las barras — un color por algoritmo ejecutado */
 const BAR_COLORS = [
@@ -20,20 +21,20 @@ const BAR_COLORS = [
 ];
 
 /**
- * SortChartComponent — diagrama de barras comparativo de tiempos de ejecución.
+ * SortChartComponent — diagrama de barras comparativo con soporte de tema.
  *
- * Por qué computed() para chartData:
- *   Deriva automáticamente el formato ChartData<'bar'> cada vez que el signal
- *   `entries` cambia, sin necesidad de ngOnChanges ni subscripciones manuales.
- *   Chart.js detecta el cambio de referencia del objeto y actualiza la gráfica.
+ * Inyecta ThemeService para que chartOptions sea reactivo al dark/light mode.
+ * Tanto `chartData` como `chartOptions` son computed() signals que se
+ * recalculan automáticamente cuando sus dependencias cambian.
  */
 @Component({
   selector: 'app-sort-chart',
-  // BaseChartDirective es standalone — se importa directamente sin módulo
   imports: [BaseChartDirective],
   templateUrl: './sort-chart.component.html',
 })
 export class SortChartComponent {
+  private readonly theme = inject(ThemeService);
+
   readonly entries = input.required<ExecutionEntry[]>();
 
   /** Deriva el formato de datos que espera Chart.js a partir del historial */
@@ -50,47 +51,66 @@ export class SortChartComponent {
           (_, i) => BAR_COLORS[i % BAR_COLORS.length],
         ),
         borderWidth: 1.5,
-        borderRadius: 6,
+        borderRadius: 8,
       },
     ],
   }));
 
-  /** Opciones estáticas del gráfico — tema oscuro consistent con Tailwind */
-  readonly chartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: { duration: 400 },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: '#1f2937',
-        titleColor: '#9ca3af',
-        bodyColor: '#f9fafb',
-        borderColor: '#374151',
-        borderWidth: 1,
-        callbacks: {
-          // ctx.parsed.y puede ser null en Chart.js para puntos faltantes
-          label: (ctx) => `  ${(ctx.parsed.y ?? 0).toFixed(3)} ms`,
+  /**
+   * Opciones del gráfico — reactivas al tema.
+   * computed() se recalcula cada vez que isDark() cambie, haciendo que
+   * Chart.js actualice los colores de ejes, grid y tooltip.
+   */
+  readonly chartOptions = computed<ChartOptions<'bar'>>(() => {
+    const dark = this.theme.isDark();
+
+    const textColor     = dark ? '#9ca3af' : '#6b7280';
+    const gridColor     = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    const borderColor   = dark ? '#374151' : '#e5e7eb';
+    const tooltipBg     = dark ? '#1e293b' : '#ffffff';
+    const tooltipTitle  = dark ? '#9ca3af' : '#6b7280';
+    const tooltipBody   = dark ? '#f1f5f9' : '#1e293b';
+    const tooltipBorder = dark ? '#334155' : '#e2e8f0';
+
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 500, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: tooltipBg,
+          titleColor: tooltipTitle,
+          bodyColor: tooltipBody,
+          borderColor: tooltipBorder,
+          borderWidth: 1,
+          cornerRadius: 8,
+          padding: 12,
+          titleFont: { size: 11, weight: 'normal' },
+          bodyFont: { size: 13, weight: 'bold' },
+          callbacks: {
+            label: (ctx) => `  ${(ctx.parsed.y ?? 0).toFixed(3)} ms`,
+          },
         },
       },
-    },
-    scales: {
-      x: {
-        ticks: { color: '#9ca3af', font: { size: 11 } },
-        grid: { color: '#1f2937' },
-        border: { color: '#374151' },
-      },
-      y: {
-        ticks: { color: '#9ca3af', font: { size: 11 } },
-        grid: { color: '#1f2937' },
-        border: { color: '#374151' },
-        title: {
-          display: true,
-          text: 'Milisegundos (ms)',
-          color: '#6b7280',
-          font: { size: 11 },
+      scales: {
+        x: {
+          ticks: { color: textColor, font: { size: 11, weight: 500 } },
+          grid: { color: gridColor },
+          border: { color: borderColor },
+        },
+        y: {
+          ticks: { color: textColor, font: { size: 11 } },
+          grid: { color: gridColor },
+          border: { color: borderColor },
+          title: {
+            display: true,
+            text: 'Milisegundos (ms)',
+            color: textColor,
+            font: { size: 11 },
+          },
         },
       },
-    },
-  };
+    };
+  });
 }

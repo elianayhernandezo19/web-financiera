@@ -1,35 +1,29 @@
 <!--
   Contenedor del gráfico de barras.
-  Usa siempre fondo oscuro (bg-gray-900) para que las paletas de Chart.js
-  —calibradas para dark mode— luzcan correctamente en ambos temas.
-  Este es un patrón común en dashboards financieros (ej: Bloomberg siempre
-  muestra los gráficos sobre fondo oscuro independientemente del tema global).
+  Ahora usa fondos responsivos al tema para consistencia visual global.
 -->
 <div
   class="relative h-72 rounded-xl overflow-hidden
-         bg-gray-900 border border-gray-800/60
-         dark:bg-white/[0.015] dark:border-white/[0.05]"
+         bg-slate-50 dark:bg-slate-900/60
+         border border-gray-200/60 dark:border-white/[0.05]
+         transition-colors duration-300"
 >
   @if (entries().length === 0) {
     <!-- Estado vacío -->
-    <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-gray-600">
+    <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-gray-400 dark:text-gray-600">
       <svg class="h-12 w-12 opacity-40" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round"
               d="M3 13.5V19a1 1 0 001 1h4v-6H3zm7-4.5V19a1 1 0 001 1h4V9h-4zm7 3V19a1 1 0 001 1h4v-7h-4z"/>
       </svg>
-      <p class="text-sm font-medium text-gray-500">Ejecuta un algoritmo para ver la comparativa</p>
-      <p class="text-xs text-gray-600">El historial de tiempos aparecerá aquí</p>
+      <p class="text-sm font-medium">Ejecuta un algoritmo para ver la comparativa</p>
+      <p class="text-xs opacity-60">El historial de tiempos aparecerá aquí</p>
     </div>
   } @else {
-    <!--
-      [data]="chartData()" — computed signal: se recalcula cada vez que `entries` cambia.
-      La nueva referencia del objeto dispara ngOnChanges en BaseChartDirective → redibuja.
-    -->
     <canvas
       baseChart
-      class="p-2"
+      class="p-3"
       [data]="chartData()"
-      [options]="chartOptions"
+      [options]="chartOptions()"
       type="bar"
     ></canvas>
   }
