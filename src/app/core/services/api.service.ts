@@ -29,7 +29,7 @@ export class ApiService {
    */
   executeSort(request: SortRequest): Observable<ApiResponse<SortExecutionResult>> {
     return this.http
-      .post<ApiResponse<SortExecutionResult>>(`${this.BASE_URL}/algoritmos/ejecutar`, request)
+      .get<ApiResponse<SortExecutionResult>>(`${this.BASE_URL}/algoritmos/${request.algorithm}`)
       .pipe(catchError(this.handleError));
   }
 

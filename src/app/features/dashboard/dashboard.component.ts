@@ -78,10 +78,8 @@ export class DashboardComponent {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    const symbol = this.selectedAssetInfo().ticker;
-
     this.api
-      .executeSort({ algorithm: this.selectedAlgorithmId(), symbol })
+      .executeSort({ algorithm: this.selectedAlgorithmId() })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
