@@ -1,19 +1,9 @@
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  DestroyRef,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { ApiService } from '../../core/services/api.service';
-import { AlgorithmInfo } from '../../core/models/algorithm.model';
-import { FinancialAsset } from '../../core/models/asset.model';
-import { ExecutionEntry, SortRecord } from '../../core/models/sort-result.model';
-import { ALGORITHMS } from '../../core/data/algorithms.data';
-import { FINANCIAL_ASSETS } from '../../core/data/assets.data';
+import type { AlgorithmInfo, FinancialAsset, ExecutionEntry, SortRecord } from '../../core';
+import { ApiService, ALGORITHMS, FINANCIAL_ASSETS } from '../../core';
 
 import { ControlPanelComponent } from './components/control-panel/control-panel.component';
 import { SortChartComponent } from './components/sort-chart/sort-chart.component';
@@ -21,61 +11,55 @@ import { ResultsTableComponent } from './components/results-table/results-table.
 import { AlgorithmCardComponent } from './components/algorithm-card/algorithm-card.component';
 
 /**
- * DashboardComponent — componente contenedor ("smart component").
+ * DashboardComponent — smart component orquestador.
  *
  * Responsabilidades:
- *   - Posee todo el estado reactivo de la pantalla con Signals
- *   - Orquesta las llamadas al ApiService
- *   - Pasa datos hacia abajo (inputs) y recibe eventos hacia arriba (outputs)
+ *   - Posee todo el estado reactivo con Signals
+ *   - Orquesta llamadas al ApiService
+ *   - Pasa datos ↓ (inputs) y recibe eventos ↑ (outputs)
  *
- * Lazy loading: se carga con `loadComponent()` en app.routes.ts.
+ * Lazy-loaded desde app.routes.ts.
  */
 @Component({
   selector: 'app-dashboard',
-  imports: [
-    DecimalPipe,
-    ControlPanelComponent,
-    SortChartComponent,
-    ResultsTableComponent,
-    AlgorithmCardComponent,
-  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DecimalPipe, ControlPanelComponent, SortChartComponent, ResultsTableComponent, AlgorithmCardComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent {
-  // ── Servicios ────────────────────────────────────────────────
-  private readonly apiService = inject(ApiService);
+  private readonly api = inject(ApiService);
   private readonly destroyRef = inject(DestroyRef);
 
-  // ── Datos estáticos ──────────────────────────────────────────
+  // ── Datos estáticos (no requieren signal) ──
   readonly algorithms: AlgorithmInfo[] = ALGORITHMS;
   readonly assets: FinancialAsset[] = FINANCIAL_ASSETS;
 
-  // ── Estado reactivo con Signals ──────────────────────────────
-  readonly selectedAlgorithmId = signal<string>(ALGORITHMS[0].id);
-  readonly selectedAssetId = signal<string>(FINANCIAL_ASSETS[0].id);
+  // ── Estado reactivo ──
+  readonly selectedAlgorithmId = signal(ALGORITHMS[0].id);
+  readonly selectedAssetId = signal(FINANCIAL_ASSETS[0].id);
   readonly executionTimes = signal<ExecutionEntry[]>([]);
   readonly sortedData = signal<SortRecord[]>([]);
-  readonly isLoading = signal<boolean>(false);
+  readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
-  // ── Señales derivadas (computed) ─────────────────────────────
-  readonly selectedAlgorithmInfo = computed<AlgorithmInfo>(
-    () => this.algorithms.find((a) => a.id === this.selectedAlgorithmId())!,
+  // ── Derivados (computed) ──
+  readonly selectedAlgorithmInfo = computed(() =>
+    this.algorithms.find(a => a.id === this.selectedAlgorithmId())!,
   );
 
-  readonly selectedAssetInfo = computed<FinancialAsset>(
-    () => this.assets.find((a) => a.id === this.selectedAssetId())!,
+  readonly selectedAssetInfo = computed(() =>
+    this.assets.find(a => a.id === this.selectedAssetId())!,
   );
 
-  readonly lastExecutionTime = computed<number | null>(() => {
-    const times = this.executionTimes();
-    return times.length > 0 ? times[times.length - 1].timeMs : null;
+  readonly lastExecutionTime = computed(() => {
+    const t = this.executionTimes();
+    return t.length ? t[t.length - 1].timeMs : null;
   });
 
-  readonly totalExecutions = computed<number>(() => this.executionTimes().length);
+  readonly totalExecutions = computed(() => this.executionTimes().length);
 
-  // ── Handlers ─────────────────────────────────────────────────
+  // ── Handlers ──
   onAlgorithmSelected(id: string): void {
     this.selectedAlgorithmId.set(id);
     this.errorMessage.set(null);
@@ -92,21 +76,16 @@ export class DashboardComponent {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    this.apiService
+    this.api
       .executeSort({ algorithm: this.selectedAlgorithmId() })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
-          this.executionTimes.update((prev) => [
+        next: (res) => {
+          this.executionTimes.update(prev => [
             ...prev,
-            {
-              algorithmId: response.algorithm,
-              algorithmName: this.selectedAlgorithmInfo().name,
-              timeMs: response.executionTimeMs,
-            },
+            { algorithmId: res.algorithm, algorithmName: this.selectedAlgorithmInfo().name, timeMs: res.executionTimeMs },
           ]);
-
-          this.sortedData.set(response.sortedData);
+          this.sortedData.set(res.sortedData);
           this.isLoading.set(false);
         },
         error: (err: Error) => {

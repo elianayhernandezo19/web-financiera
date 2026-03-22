@@ -10,7 +10,7 @@
         id="assetSelect"
         class="control-panel__select"
         [value]="selectedAssetId()"
-        (change)="onAssetChange($event)"
+        (change)="emitSelectValue($event, assetSelected)"
       >
         @for (asset of assets(); track asset.id) {
           <option [value]="asset.id">
@@ -36,7 +36,7 @@
         id="algorithmSelect"
         class="control-panel__select"
         [value]="selectedAlgorithmId()"
-        (change)="onAlgorithmChange($event)"
+        (change)="emitSelectValue($event, algorithmSelected)"
       >
         @for (algo of algorithms(); track algo.id) {
           <option [value]="algo.id">{{ algo.name }}</option>

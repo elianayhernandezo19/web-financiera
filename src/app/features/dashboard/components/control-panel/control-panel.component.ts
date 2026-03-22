@@ -1,17 +1,16 @@
-import { Component, input, output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { AlgorithmInfo } from '../../../../core/models/algorithm.model';
-import { FinancialAsset } from '../../../../core/models/asset.model';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+
+import type { AlgorithmInfo, FinancialAsset } from '../../../../core';
 
 /**
- * ControlPanelComponent — componente presentacional ("dumb component").
+ * ControlPanelComponent — presentacional (dumb).
  *
- * Contiene los selectores de activo financiero y algoritmo de ordenamiento,
- * más el botón de ejecución con estado de carga.
+ * Selectores de activo financiero y algoritmo + botón de ejecución.
+ * No posee estado propio: recibe datos por input y emite acciones por output.
  */
 @Component({
   selector: 'app-control-panel',
-  imports: [FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './control-panel.component.html',
   styleUrl: './control-panel.component.scss',
 })
@@ -21,21 +20,16 @@ export class ControlPanelComponent {
   readonly selectedAlgorithmId = input.required<string>();
   readonly assets = input.required<FinancialAsset[]>();
   readonly selectedAssetId = input.required<string>();
-  readonly isLoading = input<boolean>(false);
+  readonly isLoading = input(false);
 
   // ── Outputs ──
   readonly algorithmSelected = output<string>();
   readonly assetSelected = output<string>();
   readonly executeSortClicked = output<void>();
 
-  onAlgorithmChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.algorithmSelected.emit(value);
-  }
-
-  onAssetChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.assetSelected.emit(value);
+  /** Extrae el valor de un <select> y lo emite al output indicado */
+  emitSelectValue(event: Event, emitter: typeof this.algorithmSelected): void {
+    emitter.emit((event.target as HTMLSelectElement).value);
   }
 
   onExecute(): void {

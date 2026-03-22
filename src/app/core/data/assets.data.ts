@@ -1,4 +1,4 @@
-import { FinancialAsset } from '../models/asset.model';
+import type { FinancialAsset } from '../models';
 
 /**
  * Catálogo estático de activos financieros disponibles.

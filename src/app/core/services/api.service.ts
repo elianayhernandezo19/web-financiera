@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
-import { SortRequest, SortResponse } from '../models/sort-result.model';
+import type { SortRequest, SortResponse } from '../models';
 
 /**
  * ApiService — única capa de comunicación con el backend Node.js.

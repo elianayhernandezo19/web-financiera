@@ -1,34 +1,19 @@
-import { Component, input, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, computed, inject } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartData, ChartOptions } from 'chart.js';
-import { ExecutionEntry } from '../../../../core/models/sort-result.model';
-import { ThemeService } from '../../../../core/services/theme.service';
+import type { ChartData, ChartOptions } from 'chart.js';
 
-/** Paleta de colores para las barras — un color por algoritmo ejecutado */
-const BAR_COLORS = [
-  '#10b981', // emerald-500
-  '#3b82f6', // blue-500
-  '#f59e0b', // amber-500
-  '#ef4444', // red-500
-  '#8b5cf6', // violet-500
-  '#06b6d4', // cyan-500
-  '#f97316', // orange-500
-  '#ec4899', // pink-500
-  '#84cc16', // lime-500
-  '#14b8a6', // teal-500
-  '#a855f7', // purple-500
-  '#64748b', // slate-500
-];
+import type { ExecutionEntry } from '../../../../core';
+import { ThemeService, BAR_COLORS } from '../../../../core';
 
 /**
- * SortChartComponent — diagrama de barras comparativo con soporte de tema.
+ * SortChartComponent — diagrama de barras comparativo con tema reactivo.
  *
- * Inyecta ThemeService para que chartOptions sea reactivo al dark/light mode.
- * Tanto `chartData` como `chartOptions` son computed() signals que se
- * recalculan automáticamente cuando sus dependencias cambian.
+ * `chartData` y `chartOptions` son computed() signals que se
+ * recalculan automáticamente ante cambios en sus dependencias.
  */
 @Component({
   selector: 'app-sort-chart',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [BaseChartDirective],
   templateUrl: './sort-chart.component.html',
   styleUrl: './sort-chart.component.scss',
@@ -38,40 +23,30 @@ export class SortChartComponent {
 
   readonly entries = input.required<ExecutionEntry[]>();
 
-  /** Deriva el formato de datos que espera Chart.js a partir del historial */
+  /** Deriva el formato ChartData a partir del historial de ejecuciones */
   readonly chartData = computed<ChartData<'bar'>>(() => ({
-    labels: this.entries().map((e) => e.algorithmName),
-    datasets: [
-      {
-        data: this.entries().map((e) => e.timeMs),
-        label: 'Tiempo (ms)',
-        backgroundColor: this.entries().map(
-          (_, i) => BAR_COLORS[i % BAR_COLORS.length] + 'CC', // 80% opacidad
-        ),
-        borderColor: this.entries().map(
-          (_, i) => BAR_COLORS[i % BAR_COLORS.length],
-        ),
-        borderWidth: 1.5,
-        borderRadius: 8,
-      },
-    ],
+    labels: this.entries().map(e => e.algorithmName),
+    datasets: [{
+      data: this.entries().map(e => e.timeMs),
+      label: 'Tiempo (ms)',
+      backgroundColor: this.entries().map((_, i) => BAR_COLORS[i % BAR_COLORS.length] + 'CC'),
+      borderColor: this.entries().map((_, i) => BAR_COLORS[i % BAR_COLORS.length]),
+      borderWidth: 1.5,
+      borderRadius: 8,
+    }],
   }));
 
-  /**
-   * Opciones del gráfico — reactivas al tema.
-   * computed() se recalcula cada vez que isDark() cambie, haciendo que
-   * Chart.js actualice los colores de ejes, grid y tooltip.
-   */
+  /** Opciones reactivas al tema — se recalcula al cambiar isDark() */
   readonly chartOptions = computed<ChartOptions<'bar'>>(() => {
     const dark = this.theme.isDark();
 
-    const textColor     = dark ? '#9ca3af' : '#6b7280';
-    const gridColor     = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-    const borderColor   = dark ? '#374151' : '#e5e7eb';
-    const tooltipBg     = dark ? '#1e293b' : '#ffffff';
-    const tooltipTitle  = dark ? '#9ca3af' : '#6b7280';
-    const tooltipBody   = dark ? '#f1f5f9' : '#1e293b';
-    const tooltipBorder = dark ? '#334155' : '#e2e8f0';
+    const text = dark ? '#9ca3af' : '#6b7280';
+    const grid = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    const border = dark ? '#374151' : '#e5e7eb';
+    const tipBg = dark ? '#1e293b' : '#ffffff';
+    const tipTitle = dark ? '#9ca3af' : '#6b7280';
+    const tipBody = dark ? '#f1f5f9' : '#1e293b';
+    const tipBorder = dark ? '#334155' : '#e2e8f0';
 
     return {
       responsive: true,
@@ -80,36 +55,29 @@ export class SortChartComponent {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: tooltipBg,
-          titleColor: tooltipTitle,
-          bodyColor: tooltipBody,
-          borderColor: tooltipBorder,
+          backgroundColor: tipBg,
+          titleColor: tipTitle,
+          bodyColor: tipBody,
+          borderColor: tipBorder,
           borderWidth: 1,
           cornerRadius: 8,
           padding: 12,
           titleFont: { size: 11, weight: 'normal' },
           bodyFont: { size: 13, weight: 'bold' },
-          callbacks: {
-            label: (ctx) => `  ${(ctx.parsed.y ?? 0).toFixed(3)} ms`,
-          },
+          callbacks: { label: ctx => `  ${(ctx.parsed.y ?? 0).toFixed(3)} ms` },
         },
       },
       scales: {
         x: {
-          ticks: { color: textColor, font: { size: 11, weight: 500 } },
-          grid: { color: gridColor },
-          border: { color: borderColor },
+          ticks: { color: text, font: { size: 11, weight: 500 } },
+          grid: { color: grid },
+          border: { color: border },
         },
         y: {
-          ticks: { color: textColor, font: { size: 11 } },
-          grid: { color: gridColor },
-          border: { color: borderColor },
-          title: {
-            display: true,
-            text: 'Milisegundos (ms)',
-            color: textColor,
-            font: { size: 11 },
-          },
+          ticks: { color: text, font: { size: 11 } },
+          grid: { color: grid },
+          border: { color: border },
+          title: { display: true, text: 'Milisegundos (ms)', color: text, font: { size: 11 } },
         },
       },
     };

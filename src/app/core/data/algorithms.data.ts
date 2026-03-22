@@ -1,4 +1,4 @@
-import { AlgorithmInfo } from '../models/algorithm.model';
+import type { AlgorithmInfo } from '../models';
 
 /**
  * Catálogo estático de los 12 algoritmos de ordenamiento con sus fichas técnicas.

@@ -1,13 +1,14 @@
-import { Component, input } from '@angular/core';
-import { AlgorithmInfo } from '../../../../core/models/algorithm.model';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+
+import type { AlgorithmInfo } from '../../../../core';
 
 /**
- * AlgorithmCardComponent — muestra la ficha técnica Big O del algoritmo seleccionado.
- * Componente puramente presentacional: sin estado propio, solo recibe un input.
+ * AlgorithmCardComponent — ficha técnica Big O del algoritmo seleccionado.
+ * Puramente presentacional: sin estado, solo recibe un input.
  */
 @Component({
   selector: 'app-algorithm-card',
-  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './algorithm-card.component.html',
   styleUrl: './algorithm-card.component.scss',
 })
