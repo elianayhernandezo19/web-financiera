@@ -1,0 +1,75 @@
+// ═══════════════════════════════════════════════════════════════
+// Base styles — reset, tipografía, scrollbar, selección
+// ═══════════════════════════════════════════════════════════════
+@use 'variables' as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: $font-sans;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  color: $gray-900;
+  background: $surface-light-alt;
+  transition: background-color $transition-smooth, color $transition-smooth;
+
+  &.dark {
+    color: $gray-100;
+    background: $surface-dark;
+  }
+}
+
+body {
+  min-height: 100dvh;
+  font-size: $text-base;
+}
+
+code, pre {
+  font-family: $font-mono;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+// ── Scrollbar ──
+::-webkit-scrollbar              { width: 5px; height: 5px; }
+::-webkit-scrollbar-track        { background: transparent; }
+::-webkit-scrollbar-thumb        { background: $gray-300; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover  { background: $gray-400; }
+
+html.dark ::-webkit-scrollbar-thumb        { background: $gray-700; }
+html.dark ::-webkit-scrollbar-thumb:hover  { background: $gray-600; }
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: $gray-300 transparent;
+}
+
+html.dark * {
+  scrollbar-color: $gray-700 transparent;
+}
+
+// ── Selección ──
+::selection {
+  background-color: rgba($brand-500, 0.2);
+  color: inherit;
+}
