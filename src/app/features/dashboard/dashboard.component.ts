@@ -38,15 +38,6 @@ export class DashboardComponent {
 
   // ── Top 15 Volumen ──
   readonly topVolumeData = signal<{ symbol: string; date: string; volume: number }[]>([]);
-    { date: '2024-03-01', volume: 3490800000 },
-    { date: '2023-07-12', volume: 3420500000 },
-    { date: '2023-11-28', volume: 3380100000 },
-    { date: '2024-01-05', volume: 3310400000 },
-    { date: '2023-10-02', volume: 3260700000 },
-    { date: '2023-09-21', volume: 3190200000 },
-    { date: '2024-02-28', volume: 3150800000 },
-    { date: '2023-08-14', volume: 3110500000 },
-  ]);
 
   constructor() {
     this.initializeEmptyRace();
