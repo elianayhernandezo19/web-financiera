@@ -1,27 +1,17 @@
-<!--
-  Contenedor del gráfico de barras.
-  Ahora usa fondos responsivos al tema para consistencia visual global.
--->
-<div
-  class="relative h-72 rounded-xl overflow-hidden
-         bg-slate-50 dark:bg-slate-900/60
-         border border-gray-200/60 dark:border-white/[0.05]
-         transition-colors duration-300"
->
+<div class="chart-container">
   @if (entries().length === 0) {
     <!-- Estado vacío -->
-    <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-gray-400 dark:text-gray-600">
-      <svg class="h-12 w-12 opacity-40" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" aria-hidden="true">
+    <div class="chart-container__empty">
+      <svg class="chart-container__empty-icon" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round"
               d="M3 13.5V19a1 1 0 001 1h4v-6H3zm7-4.5V19a1 1 0 001 1h4V9h-4zm7 3V19a1 1 0 001 1h4v-7h-4z"/>
       </svg>
-      <p class="text-sm font-medium">Ejecuta un algoritmo para ver la comparativa</p>
-      <p class="text-xs opacity-60">El historial de tiempos aparecerá aquí</p>
+      <p class="chart-container__empty-title">Ejecuta un algoritmo para ver la comparativa</p>
+      <p class="chart-container__empty-sub">El historial de tiempos aparecerá aquí</p>
     </div>
   } @else {
     <canvas
       baseChart
-      class="p-3"
       [data]="chartData()"
       [options]="chartOptions()"
       type="bar"

@@ -31,6 +31,7 @@ const BAR_COLORS = [
   selector: 'app-sort-chart',
   imports: [BaseChartDirective],
   templateUrl: './sort-chart.component.html',
+  styleUrl: './sort-chart.component.scss',
 })
 export class SortChartComponent {
   private readonly theme = inject(ThemeService);

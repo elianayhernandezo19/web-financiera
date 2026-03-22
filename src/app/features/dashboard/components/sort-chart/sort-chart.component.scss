@@ -1,0 +1,54 @@
+@use '../../../../../../scss/variables' as *;
+@use '../../../../../../scss/mixins' as *;
+
+// ═══════════════════════════════════════════════════════════════
+// Sort Chart — contenedor del gráfico de barras
+// ═══════════════════════════════════════════════════════════════
+
+.chart-container {
+  position: relative;
+  height: 18rem;
+  border-radius: $radius-xl;
+  overflow: hidden;
+  background: $gray-50;
+  border: 1px solid rgba($gray-200, 0.6);
+  transition: all $transition-smooth;
+
+  :host-context(.dark) & {
+    background: rgba($gray-900, 0.6);
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.chart-container__empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: $gray-400;
+
+  :host-context(.dark) & { color: $gray-600; }
+}
+
+.chart-container__empty-icon {
+  height: 3rem;
+  width: 3rem;
+  opacity: 0.4;
+}
+
+.chart-container__empty-title {
+  font-size: $text-sm;
+  font-weight: 500;
+}
+
+.chart-container__empty-sub {
+  font-size: $text-xs;
+  opacity: 0.6;
+}
+
+.chart-container canvas {
+  padding: 0.75rem;
+}
