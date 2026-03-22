@@ -269,8 +269,10 @@
 
 // ══════════════════════════════════════
 // DOCS PANEL (Markdown Rendering)
+// ::ng-deep required — content injected via [innerHTML] and document.createElement
+// does not get Angular's encapsulation attributes
 // ══════════════════════════════════════
-.algo-docs {
+:host ::ng-deep .algo-docs {
   font-size: $text-sm;
   line-height: 1.7;
 

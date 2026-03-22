@@ -253,8 +253,8 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
 
       let graphDefinition = codeEl.textContent ?? '';
       graphDefinition = graphDefinition.replace(/\r/g, '');
-      // Convert literal \n sequences to actual newlines for Mermaid line breaks
-      graphDefinition = graphDefinition.replace(/\\n/g, '\n');
+      // Replace literal \n with <br/> for Mermaid line breaks (requires securityLevel: 'loose')
+      graphDefinition = graphDefinition.replace(/\\n/g, '<br/>');
 
       const uniqueHash = Math.random().toString(36).substring(2, 9);
       const id = `mermaid-${this.selectedAlgorithmId()}-${i}-${uniqueHash}`;
