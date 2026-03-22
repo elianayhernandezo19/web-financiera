@@ -1,0 +1,194 @@
+<div class="algo-explorer">
+  <div class="algo-container">
+
+    <!-- ══════════════ TOP BAR ══════════════ -->
+    <header class="algo-topbar">
+      <div class="algo-topbar__left">
+        <label class="algo-select-label">Algoritmo</label>
+        <div class="algo-select-wrapper">
+          <select class="algo-select" (change)="onAlgorithmChange($event)" [value]="selectedAlgorithmId()">
+            @for (algo of algorithms; track algo.id) {
+              <option [value]="algo.id">{{ algo.name }}</option>
+            }
+          </select>
+          <svg class="algo-select-chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="algo-topbar__info">
+        @if (selectedAlgorithm(); as algo) {
+          <span class="algo-badge-stable" [ngClass]="{'is-stable': algo.stable, 'is-unstable': !algo.stable}">
+            {{ algo.stable ? 'Estable' : 'No estable' }}
+          </span>
+        }
+      </div>
+    </header>
+
+    <!-- ══════════════ SPLIT VIEW ══════════════ -->
+    <div class="algo-split">
+
+      <!-- ─── LEFT COLUMN: Theory & Code ─── -->
+      <section class="algo-left">
+
+        <!-- Tab Toggle -->
+        <div class="algo-tabs">
+          <button
+            class="algo-tab"
+            [ngClass]="{'is-active': activeTab() === 'docs'}"
+            (click)="onTabChange('docs')"
+          >
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+            </svg>
+            Documentación
+          </button>
+          <button
+            class="algo-tab"
+            [ngClass]="{'is-active': activeTab() === 'code'}"
+            (click)="onTabChange('code')"
+          >
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+            Código Fuente
+          </button>
+        </div>
+
+        <!-- Docs Panel -->
+        @if (activeTab() === 'docs') {
+          <div class="algo-panel algo-docs animate-panel" #docsContainer [innerHTML]="renderedMarkdown()"></div>
+        }
+
+        <!-- Code Panel -->
+        @if (activeTab() === 'code') {
+          <div class="algo-panel algo-code-panel animate-panel">
+            <div class="algo-code-header">
+              <span class="algo-code-dot algo-code-dot--red"></span>
+              <span class="algo-code-dot algo-code-dot--yellow"></span>
+              <span class="algo-code-dot algo-code-dot--green"></span>
+              <span class="algo-code-filename">{{ selectedAlgorithm().name.toLowerCase().replace(' ', '-') }}.ts</span>
+            </div>
+            <pre class="algo-code-block"><code [innerHTML]="highlightedCode()"></code></pre>
+          </div>
+        }
+      </section>
+
+      <!-- ─── RIGHT COLUMN: Execution & Results ─── -->
+      <section class="algo-right">
+
+        <!-- Execute Button -->
+        <button class="algo-execute-btn" (click)="onExecute()" [disabled]="isExecuting()">
+          @if (isExecuting()) {
+            <span class="algo-spinner"></span>
+            Ejecutando...
+          } @else {
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" />
+            </svg>
+            Ejecutar Algoritmo
+          }
+        </button>
+
+        <!-- Metric Cards -->
+        <div class="algo-metrics">
+          <div class="algo-metric-card">
+            <span class="algo-metric-label">Tiempo de Ejecución</span>
+            <span class="algo-metric-value">
+              @if (executionTimeMs() !== null) {
+                {{ executionTimeMs() | number:'1.2-2' }} <small>ms</small>
+              } @else {
+                <span class="algo-metric-placeholder">-- ms</span>
+              }
+            </span>
+          </div>
+          <div class="algo-metric-card">
+            <span class="algo-metric-label">Registros Ordenados</span>
+            <span class="algo-metric-value">
+              @if (recordsSorted() !== null) {
+                {{ recordsSorted() | number }}
+              } @else {
+                <span class="algo-metric-placeholder">--</span>
+              }
+            </span>
+          </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="algo-results-panel">
+          <h3 class="algo-results-title">
+            Datos Ordenados
+            @if (resultData().length > 0) {
+              <span class="algo-results-count">({{ resultData().length }})</span>
+            }
+          </h3>
+
+          @if (resultData().length === 0) {
+            <div class="algo-results-empty">
+              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="width:40px;height:40px;opacity:0.3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
+              </svg>
+              <p>Ejecuta el algoritmo para ver los datos ordenados</p>
+            </div>
+          } @else {
+            <div class="algo-table-wrap">
+              <table class="algo-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th class="text-right">Apertura</th>
+                    <th class="text-right accent">Cierre</th>
+                    <th class="text-right">Volumen</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of paginatedData(); track row.date) {
+                    <tr>
+                      <td class="cell-date">{{ row.date | date:'MMM dd, yyyy' }}</td>
+                      <td class="cell-number text-right">{{ row.open | number:'1.2-2' }}</td>
+                      <td class="cell-brand text-right">{{ row.close | number:'1.2-2' }}</td>
+                      <td class="cell-volume text-right">{{ row.volume | number:'1.0-0' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Paginator -->
+            <div class="algo-paginator">
+              <button
+                class="algo-page-btn"
+                (click)="onPageChange('prev')"
+                [disabled]="currentPage() === 1"
+              >
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Anterior
+              </button>
+
+              <span class="algo-page-info">
+                Página {{ currentPage() }} de {{ totalPages() }}
+              </span>
+
+              <button
+                class="algo-page-btn"
+                (click)="onPageChange('next')"
+                [disabled]="currentPage() === totalPages()"
+              >
+                Siguiente
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          }
+        </div>
+
+      </section>
+
+    </div>
+
+  </div>
+</div>
