@@ -34,19 +34,19 @@
         <!-- Tiempo del último algoritmo -->
         @if (lastExecutionTime() !== null) {
           <div class="flex items-center gap-2.5">
-            <div class="relative flex h-7 w-7 items-center justify-center rounded-lg bg-brand-500/10 dark:bg-brand-400/[0.08] ring-1 ring-brand-500/20">
+            <div class="relative flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 dark:bg-emerald-400/[0.08] ring-1 ring-emerald-500/20">
               <!-- Indicador de pulso (activo) -->
               <span class="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-500 opacity-60"></span>
-                <span class="relative inline-flex h-2 w-2 rounded-full bg-brand-500"></span>
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60"></span>
+                <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
               </span>
-              <svg class="h-3.5 w-3.5 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <svg class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
             </div>
             <div>
               <p class="text-[9px] font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-widest leading-none mb-0.5">Último tiempo</p>
-              <p class="text-lg font-bold tabular-nums leading-none text-brand-600 dark:text-brand-400">
+              <p class="text-lg font-bold tabular-nums leading-none text-emerald-600 dark:text-emerald-400">
                 {{ lastExecutionTime()! | number: '1.0-3' }}<span class="text-xs font-normal text-gray-400 dark:text-gray-600 ml-0.5">ms</span>
               </p>
             </div>
@@ -137,7 +137,7 @@
           <div class="flex items-center justify-between mb-4">
             <h2 class="section-title">Datos Ordenados</h2>
             @if (sortedData().length > 0) {
-              <span class="text-[10px] font-semibold text-brand-600 dark:text-brand-400 tabular-nums">
+              <span class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
                 {{ sortedData().length | number }} registros
               </span>
             }
