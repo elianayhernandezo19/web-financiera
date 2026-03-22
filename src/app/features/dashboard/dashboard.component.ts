@@ -151,22 +151,22 @@ export class DashboardComponent {
 
   private startFakeRace(): void {
     this.isRacing.set(true);
-    // Velocidades aleatorias más controladas y lentas
-    const velocities = ALGORITHMS.map(() => Math.random() * 0.8 + 0.2); 
+    // Cada algoritmo recibe una velocidad lineal fija súper orgánica y lenta
+    const velocities = ALGORITHMS.map(() => Math.random() * 0.5 + 0.1); 
     
     this.fakeRaceInterval = setInterval(() => {
       const currentEntries = this.racingExecutionTimes().map((entry, idx) => {
         return {
           ...entry,
-          // Incremento muy sutil para dar sensación analítica
-          timeMs: entry.timeMs + velocities[idx] + (Math.random() * 0.1)
+          // Incremento estricto para evitar el ruido que generaba flickering
+          timeMs: entry.timeMs + velocities[idx]
         };
       });
 
-      // Ordenar por tiempo constantemente sin saltos estridentes
+      // Ordenar por tiempo (como no hay ruido, el adelantamiento ocurre limpiamente)
       currentEntries.sort((a, b) => a.timeMs - b.timeMs);
       this.racingExecutionTimes.set(currentEntries);
-    }, 100); // Secuencia suavizada a 10 cuadros efectivos
+    }, 16); // Motor a 60 fps puros en lugar de 10 fps
   }
 
   private stopFakeRace(): void {
@@ -177,7 +177,8 @@ export class DashboardComponent {
   }
 
   private startVisualRace(apiTimes: Record<string, number> | null): void {
-    this.initializeEmptyRace(); // Se resetea la carrera falsa al iniciar el sprint verdadero de 2 segundos
+    // Al NO llamar a initializeEmptyRace() de nuevo, partimos del estado exacto del Fake Race
+    // brindando una experiencia ininterrumpida.
     this.isRacing.set(true);
     
     // Valores por defecto si la API falla o devuelve nulo
@@ -196,17 +197,23 @@ export class DashboardComponent {
       bubblesort: 19853.4
     };
 
+    const initialTimes: Record<string, number> = {};
+    const starts = this.racingExecutionTimes();
+    if (starts.length === 0 || starts[0].timeMs === 0) {
+       ALGORITHMS.forEach(a => initialTimes[a.id] = 0);
+    } else {
+       starts.forEach(s => initialTimes[s.algorithmId] = s.timeMs);
+    }
+
     let step = 0;
     const maxSteps = 120; // 2 segundos a 60fps (120 frames)
     const intervalTime = 16;
     
-    // Obtenemos el tiempo máximo que tomará el más lento
-    let maxTime = 0;
+    // Normalizar llaves para tener acceso uniforme en todos
     ALGORITHMS.forEach(a => {
       const normalizedId = a.id.toLowerCase().replace(/\s/g, '');
       const t = targetTimes[normalizedId] || targetTimes[a.id] || targetTimes[a.name.toLowerCase().replace(/\s/g, '')] || Math.random() * 5000 + 1000;
-      targetTimes[a.id] = t; // re-asignar para un acceso seguro uniforme abajo
-      if (t > maxTime) maxTime = t;
+      targetTimes[a.id] = t; 
     });
 
     const easeOutQuart = (x: number): number => 1 - Math.pow(1 - x, 4);
@@ -216,11 +223,13 @@ export class DashboardComponent {
       const progress = step / maxSteps; 
       const easedProgress = easeOutQuart(progress);
       
-      const currentTimeObj = maxTime * easedProgress;
-
       const currentEntries = ALGORITHMS.map(algo => {
         const target = targetTimes[algo.id];
-        const currentVal = Math.min(currentTimeObj, target);
+        const initial = initialTimes[algo.id] || 0;
+        
+        // Cada algoritmo escala INDEPENDIENTE hacia su target real, esto crea
+        // un efecto visual de una "carrera real" con adelantamientos
+        const currentVal = initial + ((target - initial) * easedProgress);
         
         return {
           algorithmId: algo.id,
