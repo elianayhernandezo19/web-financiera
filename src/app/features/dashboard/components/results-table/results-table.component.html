@@ -1,0 +1,43 @@
+@if (data().length === 0) {
+  <!-- Estado vacío -->
+  <div class="flex flex-col items-center justify-center h-32 gap-2 text-gray-600">
+    <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75z"/>
+    </svg>
+    <p class="text-sm">Los datos ordenados aparecerán aquí tras ejecutar un algoritmo.</p>
+  </div>
+} @else {
+  <!-- Cabecera fija de la tabla -->
+  <div class="grid grid-cols-6 gap-2 px-4 py-2 mb-1
+              text-xs text-gray-500 uppercase tracking-wider
+              border-b border-gray-700">
+    <span>Fecha</span>
+    <span class="text-right">Apertura</span>
+    <span class="text-right text-emerald-400">Cierre</span>
+    <span class="text-right">Máximo</span>
+    <span class="text-right">Mínimo</span>
+    <span class="text-right">Volumen</span>
+  </div>
+
+  <!--
+    cdk-virtual-scroll-viewport renderiza solo las filas visibles dentro de
+    esta ventana de 320px de alto (equivale a ~6-7 filas simultáneas).
+    itemSize debe coincidir con la altura de cada div hijo (h-12 = 48px).
+  -->
+  <cdk-virtual-scroll-viewport itemSize="48" class="h-80">
+    <div
+      *cdkVirtualFor="let row of data(); trackBy: trackByDate"
+      class="grid grid-cols-6 gap-2 px-4 items-center h-12
+             text-sm border-b border-gray-800/60
+             hover:bg-gray-800/40 transition-colors"
+    >
+      <span class="text-gray-400 font-mono text-xs truncate">{{ row.date }}</span>
+      <span class="text-right text-gray-300">{{ row.openPrice | number: '1.2-2' }}</span>
+      <span class="text-right text-emerald-400 font-semibold">{{ row.closePrice | number: '1.2-2' }}</span>
+      <span class="text-right text-gray-300">{{ row.highPrice | number: '1.2-2' }}</span>
+      <span class="text-right text-gray-300">{{ row.lowPrice | number: '1.2-2' }}</span>
+      <span class="text-right text-gray-500 text-xs">{{ row.volume | number: '1.0-0' }}</span>
+    </div>
+  </cdk-virtual-scroll-viewport>
+}

@@ -1,0 +1,36 @@
+/*
+ * Tailwind CSS v4 — la única importación necesaria.
+ * En v4 no se requiere tailwind.config.js; la configuración vive aquí en CSS.
+ * Nota: se usa @use (sintaxis Sass moderna) para evitar la deprecación de @import.
+ * Angular 21 + @angular/build procesan esta directiva via el plugin PostCSS integrado.
+ */
+@use "tailwindcss";
+
+/*
+ * Declara la variante `dark` basada en la clase `.dark` en el elemento padre.
+ * Al agregar class="dark" al <html> en index.html, todas las clases `dark:`
+ * de Tailwind se activan globalmente (modo oscuro forzado).
+ */
+@custom-variant dark (&:is(.dark *));
+
+/* ── Utilidades globales reutilizables ── */
+@layer components {
+  /*
+   * Título de sección usado en DashboardComponent (4 repeticiones).
+   * Centralizar aquí evita duplicar la cadena de clases en el template.
+   */
+  .section-title {
+    @apply text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4;
+  }
+}
+
+/* Suaviza el scroll en toda la aplicación */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Estilo de la barra de scroll en navegadores Webkit (Dark mode) */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #111827; }
+::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #4b5563; }

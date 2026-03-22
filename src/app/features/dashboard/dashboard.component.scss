@@ -1,0 +1,4 @@
+// La clase utilitaria `.section-title` se define aquí como única excepción
+// al uso de Tailwind directo en el template, dado que se repite 4 veces en
+// el mismo componente. En un proyecto real iría en styles.scss como @layer components.
+// El resto del estialdo usa clases Tailwind directamente en el HTML.

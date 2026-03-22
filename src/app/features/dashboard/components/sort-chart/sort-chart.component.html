@@ -1,0 +1,24 @@
+<div class="relative h-64">
+  @if (entries().length === 0) {
+    <!-- Estado vacío: se muestra antes de ejecutar cualquier algoritmo -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-600">
+      <svg class="h-10 w-10" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 13.5V19a1 1 0 001 1h4v-6H3zm7-4.5V19a1 1 0 001 1h4V9h-4zm7 3V19a1 1 0 001 1h4v-7h-4z"/>
+      </svg>
+      <p class="text-sm">Ejecuta un algoritmo para ver la comparativa aquí.</p>
+    </div>
+  } @else {
+    <!--
+      [data]="chartData()" — Angular evalúa la señal computed en el template.
+      Cada vez que `entries` cambia, chartData() retorna un nuevo objeto,
+      lo que dispara ngOnChanges en BaseChartDirective y redibuja el chart.
+    -->
+    <canvas
+      baseChart
+      [data]="chartData()"
+      [options]="chartOptions"
+      type="bar"
+    ></canvas>
+  }
+</div>

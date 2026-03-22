@@ -1,0 +1,40 @@
+<div class="flex flex-col gap-4">
+  <!-- Descripción -->
+  <p class="text-gray-400 text-sm leading-relaxed">{{ algorithm().description }}</p>
+
+  <!-- Cuadrícula Big O -->
+  <div class="grid grid-cols-2 gap-3 text-sm">
+
+    <div class="bg-gray-950/70 border border-gray-800 rounded-lg p-3">
+      <p class="text-gray-600 text-xs uppercase tracking-wider mb-1.5">Mejor Caso</p>
+      <code class="text-emerald-400 font-mono font-bold text-base">{{ algorithm().bestCase }}</code>
+    </div>
+
+    <div class="bg-gray-950/70 border border-gray-800 rounded-lg p-3">
+      <p class="text-gray-600 text-xs uppercase tracking-wider mb-1.5">Caso Promedio</p>
+      <code class="text-yellow-400 font-mono font-bold text-base">{{ algorithm().averageCase }}</code>
+    </div>
+
+    <div class="bg-gray-950/70 border border-gray-800 rounded-lg p-3">
+      <p class="text-gray-600 text-xs uppercase tracking-wider mb-1.5">Peor Caso</p>
+      <code class="text-red-400 font-mono font-bold text-base">{{ algorithm().worstCase }}</code>
+    </div>
+
+    <div class="bg-gray-950/70 border border-gray-800 rounded-lg p-3">
+      <p class="text-gray-600 text-xs uppercase tracking-wider mb-1.5">Espacio</p>
+      <code class="text-blue-400 font-mono font-bold text-base">{{ algorithm().spaceComplexity }}</code>
+    </div>
+
+  </div>
+
+  <!-- Indicador de estabilidad -->
+  <div class="flex items-center gap-2 pt-1">
+    <span
+      class="inline-block w-2.5 h-2.5 rounded-full"
+      [class]="algorithm().stable ? 'bg-emerald-400' : 'bg-red-400'"
+    ></span>
+    <span class="text-xs text-gray-500">
+      {{ algorithm().stable ? 'Algoritmo Estable' : 'Algoritmo Inestable' }}
+    </span>
+  </div>
+</div>
