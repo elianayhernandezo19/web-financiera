@@ -140,7 +140,7 @@
   min-height: 0;
 
   @include xl {
-    grid-template-columns: 380px 1fr;
+    grid-template-columns: 1fr 1fr;
     align-items: flex-start;
   }
 }
@@ -505,20 +505,20 @@
   
   @include lg {
     flex-direction: row;
-    align-items: stretch;
+    align-items: center;
   }
 }
 
 .algo-execute-btn {
   @include btn-primary;
   flex: 1;
-  padding: 1rem 1.5rem;
-  font-size: $text-sm;
+  padding: 0.75rem 1.25rem;
+  font-size: 13px;
   gap: 0.5rem;
   white-space: nowrap;
   
   @include lg {
-    max-width: 280px;
+    max-width: 240px;
   }
 }
 
@@ -548,9 +548,10 @@
   @include glass-card;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem;
+  gap: 0.25rem;
+  padding: 0.6rem 1rem;
   text-align: center;
+  justify-content: center;
 
   &:hover {
     transform: none;

@@ -63,7 +63,7 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
 
   // ── Paginator ──
   readonly currentPage = signal<number>(1);
-  readonly pageSize = 20;
+  readonly pageSize = 40;
 
   // ── Content ──
   readonly renderedMarkdown = signal<string>('');
