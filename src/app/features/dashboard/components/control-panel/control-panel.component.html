@@ -1,30 +1,6 @@
 <div class="control-panel">
 
-  <!-- ── Selector de Activo ── -->
-  <div class="control-panel__group">
-    <label for="assetSelect" class="control-panel__label">
-      Activo Financiero
-    </label>
-    <div class="control-panel__select-wrap">
-      <select
-        id="assetSelect"
-        class="control-panel__select"
-        [value]="selectedAssetId()"
-        (change)="emitSelectValue($event, assetSelected)"
-      >
-        @for (asset of assets(); track asset.id) {
-          <option [value]="asset.id">
-            {{ asset.ticker }} — {{ asset.name }}
-          </option>
-        }
-      </select>
-      <span class="control-panel__chevron">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-        </svg>
-      </span>
-    </div>
-  </div>
+
 
   <!-- ── Selector de Algoritmo ── -->
   <div class="control-panel__group">
