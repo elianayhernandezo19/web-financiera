@@ -532,7 +532,7 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
       const pad = 64;
       const fitW = (vpW - pad) / svgW;
       const fitH = (vpH - pad) / svgH;
-      zoom = Math.min(fitW, fitH, 1); // cap at 100%
+      zoom = Math.min(fitW, fitH); // scale up to fill — no cap
       zoom = Math.max(0.05, zoom);
 
       const scaledW = svgW * zoom;
