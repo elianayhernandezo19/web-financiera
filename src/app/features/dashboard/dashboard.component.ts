@@ -1,31 +1,21 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, DestroyRef } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import type { AlgorithmInfo, FinancialAsset, ExecutionEntry, SortRecord } from '@core';
-import { ApiService, ALGORITHMS, FINANCIAL_ASSETS } from '@core';
-
 import {
-  ControlPanelComponent,
   SortChartComponent,
   ResultsTableComponent,
-  AlgorithmCardComponent,
+  TopVolumeComponent
 } from './components';
 
-/**
- * DashboardComponent — smart component orquestador.
- *
- * Responsabilidades:
- *   - Posee todo el estado reactivo con Signals
- *   - Orquesta llamadas al ApiService
- *   - Pasa datos ↓ (inputs) y recibe eventos ↑ (outputs)
- *
- * Lazy-loaded desde app.routes.ts.
- */
+import { ALGORITHMS } from '@core/data/algorithms.data';
+import { ApiService } from '@core';
+import type { SortRecord, ExecutionEntry } from '@core';
+
 @Component({
   selector: 'app-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe, ControlPanelComponent, SortChartComponent, ResultsTableComponent, AlgorithmCardComponent],
+  standalone: true,
+  imports: [SortChartComponent, ResultsTableComponent, TopVolumeComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -33,81 +23,110 @@ export class DashboardComponent {
   private readonly api = inject(ApiService);
   private readonly destroyRef = inject(DestroyRef);
 
-  // ── Datos estáticos (no requieren signal) ──
-  readonly algorithms: AlgorithmInfo[] = ALGORITHMS;
-  readonly assets: FinancialAsset[] = FINANCIAL_ASSETS;
+  // ── Estados UI ──
+  readonly isRacing = signal<boolean>(false);
+  readonly isFullscreen = signal<boolean>(false);
 
-  // ── Estado reactivo ──
-  readonly selectedAlgorithmId = signal(ALGORITHMS[0].id);
-  readonly selectedAssetId = signal(FINANCIAL_ASSETS[0].id);
-  readonly executionTimes = signal<ExecutionEntry[]>([]);
+  // ── Datos (Signals Generales) ──
+  readonly racingExecutionTimes = signal<ExecutionEntry[]>([]);
   readonly sortedData = signal<SortRecord[]>([]);
-  readonly isLoading = signal(false);
-  readonly errorMessage = signal<string | null>(null);
 
-  // ── Derivados (computed) ──
-  readonly selectedAlgorithmInfo = computed(() =>
-    this.algorithms.find(a => a.id === this.selectedAlgorithmId())!,
-  );
+  // ── Datos (Mocks Top Volumen) ──
+  readonly topVolumeData = signal<{ date: string; volume: number }[]>([
+    { date: '2023-11-02', volume: 4521000000 },
+    { date: '2023-10-15', volume: 4180500000 },
+    { date: '2024-01-22', volume: 3950200000 },
+    { date: '2023-09-08', volume: 3820100000 },
+    { date: '2024-02-14', volume: 3750000000 },
+    { date: '2023-12-05', volume: 3610900000 },
+    { date: '2023-08-30', volume: 3540200000 },
+    { date: '2024-03-01', volume: 3490800000 },
+    { date: '2023-07-12', volume: 3420500000 },
+    { date: '2023-11-28', volume: 3380100000 },
+    { date: '2024-01-05', volume: 3310400000 },
+    { date: '2023-10-02', volume: 3260700000 },
+    { date: '2023-09-21', volume: 3190200000 },
+    { date: '2024-02-28', volume: 3150800000 },
+    { date: '2023-08-14', volume: 3110500000 },
+  ]);
 
-  readonly selectedAssetInfo = computed(() =>
-    this.assets.find(a => a.id === this.selectedAssetId())!,
-  );
-
-  readonly lastExecutionTime = computed(() => {
-    const t = this.executionTimes();
-    return t.length ? t[t.length - 1].timeMs : null;
-  });
-
-  readonly totalExecutions = computed(() => this.executionTimes().length);
-
-  // ── Handlers ──
-  onAlgorithmSelected(id: string): void {
-    this.selectedAlgorithmId.set(id);
-    this.errorMessage.set(null);
+  constructor() {
+    this.initializeEmptyRace();
   }
 
-  onAssetSelected(id: string): void {
-    this.selectedAssetId.set(id);
-    this.errorMessage.set(null);
+  // ── Toggle Pantalla Completa ──
+  toggleFullscreen(): void {
+    this.isFullscreen.update(v => !v);
   }
 
-  onExecuteSort(): void {
-    if (this.isLoading()) return;
+  // ── Simulación Visual de Carrera (Mocks) ──
+  onSimulateRace(): void {
+    if (this.isRacing()) return;
+    this.isRacing.set(true);
+    this.initializeEmptyRace();
 
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
+    // Valores finales mockeados (en ms) como referencia
+    const targetTimes: Record<string, number> = {
+      timsort: 12.5,
+      quicksort: 14.2,
+      mergesort: 18.7,
+      heapsort: 21.3,
+      shellsort: 35.1,
+      combsort: 42.8,
+      radixsort: 55.4,
+      countingsort: 62.1,
+      bucketsort: 75.9,
+      insertionsort: 450.2,
+      selectionsort: 1250.5,
+      bubblesort: 2800.8
+    };
 
-    this.api
-      .executeSort({ algorithm: this.selectedAlgorithmId() })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          if (!res.success) {
-            this.errorMessage.set(res.message || 'Error desde el servidor');
-            this.isLoading.set(false);
-            return;
-          }
-          
-          const executionResult = res.data;
-          
-          this.executionTimes.update(prev => [
-            ...prev,
-            { algorithmId: this.selectedAlgorithmId(), algorithmName: executionResult.algorithm, timeMs: executionResult.executionTimeMs },
-          ]);
-          this.sortedData.set(executionResult.data);
-          this.isLoading.set(false);
-        },
-        error: (err: Error) => {
-          this.errorMessage.set(err.message);
-          this.isLoading.set(false);
-        },
-      });
+    let step = 0;
+    const maxSteps = 40; // frames
+    const intervalTime = 50; // ms
+
+    const interval = setInterval(() => {
+      step++;
+      const progress = step / maxSteps;
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+
+      const currentEntries = ALGORITHMS.map(algo => ({
+        algorithmId: algo.id,
+        algorithmName: algo.name,
+        timeMs: (targetTimes[algo.id] || Number.MAX_VALUE) * easeProgress
+      }));
+
+      // Ordenar por tiempo actual (Ascendente) para simular carrera real
+      currentEntries.sort((a, b) => a.timeMs - b.timeMs);
+      this.racingExecutionTimes.set(currentEntries);
+
+      if (step >= maxSteps) {
+        clearInterval(interval);
+        this.isRacing.set(false);
+        this.generateMockTableData();
+      }
+    }, intervalTime);
   }
 
-  clearHistory(): void {
-    this.executionTimes.set([]);
+  private initializeEmptyRace(): void {
+    const emptyEntries = ALGORITHMS.map(algo => ({
+      algorithmId: algo.id,
+      algorithmName: algo.name,
+      timeMs: 0
+    }));
+    this.racingExecutionTimes.set(emptyEntries);
     this.sortedData.set([]);
-    this.errorMessage.set(null);
+  }
+
+  private generateMockTableData(): void {
+    const mockData: SortRecord[] = Array.from({ length: 50 }).map((_, i) => ({
+      date: new Date(Date.now() - i * 86400000).toISOString(),
+      open: 150 + Math.random() * 10,
+      high: 160 + Math.random() * 10,
+      low: 140 + Math.random() * 10,
+      close: 155 + Math.random() * 10,
+      volume: 1000000 + Math.random() * 5000000
+    }));
+    this.sortedData.set(mockData);
   }
 }
