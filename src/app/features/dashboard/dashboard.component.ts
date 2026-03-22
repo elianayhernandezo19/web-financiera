@@ -27,6 +27,7 @@ export class DashboardComponent {
   readonly isExecutingApi = signal<boolean>(false);
   readonly isFullscreen = signal<boolean>(false);
   readonly isRaceFinished = signal<boolean>(false);
+  readonly showingChart = signal<boolean>(true);
 
   // ── Datos (Signals Generales) ──
   readonly racingExecutionTimes = signal<ExecutionEntry[]>([]);
@@ -129,6 +130,11 @@ export class DashboardComponent {
   // ── Toggle Pantalla Completa ──
   toggleFullscreen(): void {
     this.isFullscreen.update(v => !v);
+  }
+
+  // ── Toggle Vista Tabla/Grafica ──
+  toggleChartView(): void {
+    this.showingChart.update(v => !v);
   }
 
   // ── Simulación Visual de Carrera (Real API o Fallback) ──

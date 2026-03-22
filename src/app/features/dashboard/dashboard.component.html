@@ -7,24 +7,87 @@
     <section class="cmd-race-track glass-panel">
       <header class="cmd-panel-header">
         <h2 class="cmd-section-title">Carrera de Algoritmos (Benchmark)</h2>
-        <button class="cmd-btn-play" (click)="onSimulateRace()" [disabled]="isRacing() || isExecutingApi()" title="Ejecutar Carrera">
-          @if (isExecutingApi()) {
-            <span class="cmd-pulse"></span>
-            Procesando ( Backend )...
-          } @else if (isRacing()) {
-            <span class="cmd-pulse"></span>
-            Simulando...
-          } @else {
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            Ejecutar
-          }
-        </button>
+        <div class="cmd-header-actions">
+          <button class="cmd-btn-toggle" (click)="toggleChartView()" title="Cambiar Vista">
+            @if (showingChart()) {
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+              Tabla
+            } @else {
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l3 3l3-3l6 6" />
+              </svg>
+              Gráfica
+            }
+          </button>
+          <button class="cmd-btn-play" (click)="onSimulateRace()" [disabled]="isRacing() || isExecutingApi()" title="Ejecutar Carrera">
+            @if (isExecutingApi()) {
+              <span class="cmd-pulse"></span>
+              Procesando ( Backend )...
+            } @else if (isRacing()) {
+              <span class="cmd-pulse"></span>
+              Simulando...
+            } @else {
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Ejecutar
+            }
+          </button>
+        </div>
       </header>
       <div class="cmd-chart-wrapper">
-        <app-sort-chart [entries]="racingExecutionTimes()" [isFinished]="isRaceFinished()" />
+        @if (showingChart()) {
+          <div class="cmd-chart-container animate-fade-in">
+            <app-sort-chart [entries]="racingExecutionTimes()" [isFinished]="isRaceFinished()" />
+          </div>
+        } @else {
+          <div class="cmd-table-view animate-fade-in">
+            <table class="cmd-basic-table">
+              <thead>
+                <tr>
+                  <th>Algoritmo</th>
+                  <th class="text-right">Tiempo de Finalización</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (entry of racingExecutionTimes(); track entry.algorithmId; let i = $index) {
+                  <tr>
+                    <td>
+                      <div class="algo-name">
+                        @if (isRaceFinished() || (entry.timeMs > 0 && isRacing())) {
+                          @if (i === 0) {
+                            <span class="podium-medal" title="1er Lugar">🥇</span>
+                          } @else if (i === 1) {
+                            <span class="podium-medal" title="2do Lugar">🥈</span>
+                          } @else if (i === 2) {
+                            <span class="podium-medal" title="3er Lugar">🥉</span>
+                          } @else {
+                            <span class="podium-empty"></span>
+                          }
+                        } @else {
+                          <span class="podium-empty"></span>
+                        }
+                        <span class="algo-badge" [attr.data-algo]="entry.algorithmId"></span>
+                        {{ entry.algorithmName }}
+                      </div>
+                    </td>
+                    <td class="text-right">
+                      @if (entry.timeMs === 0 && !isRacing() && !isRaceFinished()) {
+                        <span class="text-muted">Pendiente</span>
+                      } @else {
+                        <span class="time-value">{{ entry.timeMs | number:'1.2-2' }} ms</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
       </div>
     </section>
 
