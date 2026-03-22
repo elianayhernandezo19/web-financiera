@@ -44,29 +44,37 @@ mermaid.initialize({
 
 /**
  * Reliably get the intrinsic width or height of a Mermaid-generated SVG.
- * Mermaid sets explicit width/height attributes (e.g. "1543.4765625").
- * Falls back to viewBox, then getBBox, then getBoundingClientRect.
+ * Mermaid v11 may set width="100%" with style="max-width: 1543px;".
+ * We need the real pixel size, not percentages.
  */
 function getSvgIntrinsicSize(svg: SVGSVGElement, dim: 'width' | 'height'): number {
-  // 1) Explicit attribute (most reliable for Mermaid)
-  const attr = parseFloat(svg.getAttribute(dim) || '');
-  if (attr > 0) return attr;
+  // 1) Explicit pixel attribute (skip percentages)
+  const attrStr = svg.getAttribute(dim) || '';
+  if (attrStr && !attrStr.includes('%')) {
+    const val = parseFloat(attrStr);
+    if (val > 0) return val;
+  }
 
-  // 2) viewBox
+  // 2) style.maxWidth / style.maxHeight (Mermaid v11 sets max-width in style)
+  const styleProp = dim === 'width' ? 'maxWidth' : 'maxHeight';
+  const styleVal = parseFloat(svg.style[styleProp] || '');
+  if (styleVal > 0) return styleVal;
+
+  // 3) viewBox
   const vb = svg.viewBox?.baseVal;
   if (vb) {
     const v = dim === 'width' ? vb.width : vb.height;
     if (v > 0) return v;
   }
 
-  // 3) getBBox (SVG internal coordinate system)
+  // 4) getBBox (SVG internal coordinate system)
   try {
     const bbox = svg.getBBox();
-    const v = dim === 'width' ? bbox.width : bbox.height;
+    const v = dim === 'width' ? (bbox.x + bbox.width) : (bbox.y + bbox.height);
     if (v > 0) return v;
   } catch { /* getBBox can throw if SVG not in DOM */ }
 
-  // 4) getBoundingClientRect (layout size, last resort)
+  // 5) getBoundingClientRect (layout size, last resort)
   const rect = svg.getBoundingClientRect();
   return dim === 'width' ? rect.width : rect.height;
 }
@@ -400,22 +408,18 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
     };
 
     // Auto-fit with retry (viewport may not be laid out immediately)
-    const tryAutoFit = (retries = 3) => {
+    const tryAutoFit = (retries = 5) => {
       requestAnimationFrame(() => {
-        if (viewport.clientWidth > 0) {
+        const svgEl = content.querySelector('svg');
+        const w = getSvgIntrinsicSize(svgEl!, 'width');
+        if (viewport.clientWidth > 0 && svgEl && w > 10) {
           autoFit();
         } else if (retries > 0) {
-          setTimeout(() => tryAutoFit(retries - 1), 50);
+          setTimeout(() => tryAutoFit(retries - 1), 80);
         }
       });
     };
     tryAutoFit();
-
-    // Re-fit when the container resizes (e.g. panel expand/collapse)
-    const ro = new ResizeObserver(() => {
-      autoFit();
-    });
-    ro.observe(viewport);
 
     // Wheel zoom (centered on pointer)
     viewport.addEventListener('wheel', (e: WheelEvent) => {
