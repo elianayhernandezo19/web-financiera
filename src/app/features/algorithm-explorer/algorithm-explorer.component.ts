@@ -197,8 +197,8 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
       const pre = codeEl.parentElement;
       if (!pre) continue;
 
-      const graphDefinition = codeEl.textContent ?? '';
-      const id = `mermaid-${this.selectedAlgorithmId()}-${i}`;
+      const uniqueHash = Math.random().toString(36).substring(2, 9);
+      const id = `mermaid-${this.selectedAlgorithmId()}-${i}-${uniqueHash}`;
 
       try {
         const { svg } = await mermaid.render(id, graphDefinition);
