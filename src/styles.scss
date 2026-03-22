@@ -1,13 +1,15 @@
 /*
  * Tailwind CSS v4.
  *
- * IMPORTANTE: @apply NO funciona con `@use "tailwindcss"` en SCSS.
- * Sass resuelve el módulo antes de que PostCSS/Tailwind procese @apply.
- * Por eso NO usamos @apply aquí. Los estilos van como:
- *   - Clases inline de Tailwind en los templates (JIT funciona perfecto)
- *   - CSS nativo en @layer components para abstracciones complejas
+ * Se usa @import en vez de @use para que el plugin PostCSS de Tailwind v4
+ * reconozca el archivo como entry point y active el scanner JIT que genera
+ * las clases utilitarias a partir de los templates Angular.
+ *
+ * @use "tailwindcss" solo resuelve un CSS estático (theme + reset) sin JIT.
+ * La advertencia de deprecación de Sass por @import es cosmética; la funcionalidad
+ * es la correcta.
  */
-@use "tailwindcss";
+@import "tailwindcss";
 
 /* Dark mode: activado con class="dark" en <html> (ThemeService) */
 @custom-variant dark (&:is(.dark *));
