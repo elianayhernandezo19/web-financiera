@@ -1,0 +1,13 @@
+/*
+ * Tailwind CSS v4 — entry point.
+ *
+ * Este archivo DEBE ser .css (no .scss) para que el PostCSS plugin de
+ * Tailwind v4 integrado en @angular/build lo procese directamente.
+ * Si se usa .scss, Sass resuelve @import "tailwindcss" como un módulo
+ * Sass y el PostCSS plugin nunca recibe la directiva @tailwind utilities
+ * para generar las clases JIT.
+ */
+@import "tailwindcss";
+
+/* Dark mode: activado con class="dark" en <html> (ThemeService) */
+@custom-variant dark (&:is(.dark *));

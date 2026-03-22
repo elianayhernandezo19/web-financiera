@@ -1,18 +1,10 @@
 /*
- * Tailwind CSS v4.
+ * Estilos globales custom.
  *
- * Se usa @import en vez de @use para que el plugin PostCSS de Tailwind v4
- * reconozca el archivo como entry point y active el scanner JIT que genera
- * las clases utilitarias a partir de los templates Angular.
- *
- * @use "tailwindcss" solo resuelve un CSS estático (theme + reset) sin JIT.
- * La advertencia de deprecación de Sass por @import es cosmética; la funcionalidad
- * es la correcta.
+ * Tailwind v4 se importa desde src/tailwind.css (archivo .css separado)
+ * para que el PostCSS plugin lo procese correctamente y active el JIT.
+ * Aquí solo van estilos nativos CSS/SCSS que complementan a Tailwind.
  */
-@import "tailwindcss";
-
-/* Dark mode: activado con class="dark" en <html> (ThemeService) */
-@custom-variant dark (&:is(.dark *));
 
 /* ═══════════════════════════════════════════════════
  * Componentes reutilizables — CSS nativo (sin @apply)
