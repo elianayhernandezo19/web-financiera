@@ -41,9 +41,24 @@ export class DashboardComponent {
   readonly topVolumeData = signal<{ symbol: string; date: string; volume: number }[]>([]);
 
   constructor() {
-    this.initializeEmptyRace();
     this.loadInitialTableData();
     this.loadTopVolume();
+    this.restoreRaceResults();
+  }
+
+  // ── Persistencia Local Storage ──
+  private restoreRaceResults(): void {
+    try {
+      const saved = localStorage.getItem('financiera_race_results');
+      if (saved) {
+        const apiTimes = JSON.parse(saved);
+        this.startVisualRace(apiTimes, true); // restaurar instantáneamente sin animar
+        return;
+      }
+    } catch (e) {
+      console.warn('No se pudo acceder a localStorage', e);
+    }
+    this.initializeEmptyRace();
   }
 
   // ── Top 15 Volumen (API Real) ──
@@ -135,6 +150,11 @@ export class DashboardComponent {
             // Si hay error de TIMEOUT, asignar un tiempo muy alto o el máximo esperado
             realTimes[normalizedId] = r.error ? 60000 : r.executionTimeMs;
           });
+          // Guardar en local storage para no repetir el llamado en f5
+          try {
+            localStorage.setItem('financiera_race_results', JSON.stringify(realTimes));
+          } catch(e) {}
+          
           this.startVisualRace(realTimes);
         } else {
           this.startVisualRace(null); // usar mocks por defecto
@@ -176,7 +196,7 @@ export class DashboardComponent {
     }
   }
 
-  private startVisualRace(apiTimes: Record<string, number> | null): void {
+  private startVisualRace(apiTimes: Record<string, number> | null, instant = false): void {
     // Al NO llamar a initializeEmptyRace() de nuevo, partimos del estado exacto del Fake Race
     // brindando una experiencia ininterrumpida.
     this.isRacing.set(true);
@@ -215,6 +235,22 @@ export class DashboardComponent {
       const t = targetTimes[normalizedId] || targetTimes[a.id] || targetTimes[a.name.toLowerCase().replace(/\s/g, '')] || Math.random() * 5000 + 1000;
       targetTimes[a.id] = t; 
     });
+
+    if (instant) {
+      const finalEntries = ALGORITHMS.map(algo => ({
+        algorithmId: algo.id,
+        algorithmName: algo.name,
+        timeMs: targetTimes[algo.id]
+      }));
+      finalEntries.sort((a, b) => {
+        if (a.timeMs === b.timeMs) return targetTimes[a.algorithmId] - targetTimes[b.algorithmId];
+        return a.timeMs - b.timeMs;
+      });
+      this.racingExecutionTimes.set(finalEntries);
+      this.isRacing.set(false);
+      this.isRaceFinished.set(true);
+      return;
+    }
 
     const easeOutQuart = (x: number): number => 1 - Math.pow(1 - x, 4);
 
