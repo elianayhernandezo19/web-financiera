@@ -25,6 +25,7 @@ export class DashboardComponent {
   readonly isRacing = signal<boolean>(false);
   readonly isExecutingApi = signal<boolean>(false);
   readonly isFullscreen = signal<boolean>(false);
+  readonly isRaceFinished = signal<boolean>(false);
 
   // ── Datos (Signals Generales) ──
   readonly racingExecutionTimes = signal<ExecutionEntry[]>([]);
@@ -113,6 +114,7 @@ export class DashboardComponent {
   onSimulateRace(): void {
     if (this.isRacing() || this.isExecutingApi()) return;
     
+    this.isRaceFinished.set(false);
     this.isExecutingApi.set(true);
     this.initializeEmptyRace();
     this.startFakeRace();
@@ -149,20 +151,22 @@ export class DashboardComponent {
 
   private startFakeRace(): void {
     this.isRacing.set(true);
-    const velocities = ALGORITHMS.map(() => Math.random() * 8 + 2); // Velocidades simuladas
+    // Velocidades aleatorias más controladas y lentas
+    const velocities = ALGORITHMS.map(() => Math.random() * 0.8 + 0.2); 
     
     this.fakeRaceInterval = setInterval(() => {
       const currentEntries = this.racingExecutionTimes().map((entry, idx) => {
         return {
           ...entry,
-          timeMs: entry.timeMs + velocities[idx] + (Math.random() * 5)
+          // Incremento muy sutil para dar sensación analítica
+          timeMs: entry.timeMs + velocities[idx] + (Math.random() * 0.1)
         };
       });
 
-      // Ordenar por tiempo constantemente
+      // Ordenar por tiempo constantemente sin saltos estridentes
       currentEntries.sort((a, b) => a.timeMs - b.timeMs);
       this.racingExecutionTimes.set(currentEntries);
-    }, 50); // 20 frames por segundo durante la espera
+    }, 100); // Secuencia suavizada a 10 cuadros efectivos
   }
 
   private stopFakeRace(): void {
@@ -237,11 +241,13 @@ export class DashboardComponent {
       if (step >= maxSteps) {
         clearInterval(interval);
         this.isRacing.set(false);
+        this.isRaceFinished.set(true);
       }
     }, intervalTime);
   }
 
   private initializeEmptyRace(): void {
+    this.isRaceFinished.set(false);
     const emptyEntries = ALGORITHMS.map(algo => ({
       algorithmId: algo.id,
       algorithmName: algo.name,

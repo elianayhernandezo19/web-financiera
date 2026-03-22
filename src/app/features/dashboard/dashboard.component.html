@@ -24,7 +24,7 @@
         </button>
       </header>
       <div class="cmd-chart-wrapper">
-        <app-sort-chart [entries]="racingExecutionTimes()" />
+        <app-sort-chart [entries]="racingExecutionTimes()" [isFinished]="isRaceFinished()" />
       </div>
     </section>
 
