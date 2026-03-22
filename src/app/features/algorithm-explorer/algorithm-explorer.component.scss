@@ -139,8 +139,9 @@
   gap: 1.25rem;
   min-height: 0;
 
-  @include lg {
-    grid-template-columns: 1fr 1fr;
+  @include xl {
+    grid-template-columns: 380px 1fr;
+    align-items: flex-start;
   }
 }
 
@@ -214,7 +215,7 @@
   max-height: 65vh;
   overflow-y: auto;
   border-radius: 0 0 $radius-lg $radius-lg;
-  padding: 1.5rem;
+  padding: 1.2rem;
 
   // LIGHT MODE
   background: rgba(255, 255, 255, 0.85);
@@ -435,8 +436,8 @@
   margin: 0;
   overflow-x: auto;
   font-family: $font-mono;
-  font-size: 12px;
-  line-height: 1.65;
+  font-size: 11px;
+  line-height: 1.6;
   background: $gray-50;
   color: $gray-800;
   min-height: 250px;
@@ -496,13 +497,29 @@
   min-height: 0;
 }
 
-// ── Execute Button ──
+// ── Execute Button & Metrics Header ──
+.algo-action-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  
+  @include lg {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
 .algo-execute-btn {
   @include btn-primary;
-  width: 100%;
-  padding: 1rem 2rem;
-  font-size: $text-base;
-  gap: 0.75rem;
+  flex: 1;
+  padding: 1rem 1.5rem;
+  font-size: $text-sm;
+  gap: 0.5rem;
+  white-space: nowrap;
+  
+  @include lg {
+    max-width: 280px;
+  }
 }
 
 .algo-spinner {
@@ -521,6 +538,7 @@
 
 // ── Metric Cards ──
 .algo-metrics {
+  flex: 2;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;

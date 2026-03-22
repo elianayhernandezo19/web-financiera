@@ -78,40 +78,43 @@
       <!-- ─── RIGHT COLUMN: Execution & Results ─── -->
       <section class="algo-right">
 
-        <!-- Execute Button -->
-        <button class="algo-execute-btn" (click)="onExecute()" [disabled]="isExecuting()">
-          @if (isExecuting()) {
-            <span class="algo-spinner"></span>
-            Ejecutando...
-          } @else {
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" />
-            </svg>
-            Ejecutar Algoritmo
-          }
-        </button>
+        <!-- Horizontal Action Bar: Button + Metrics -->
+        <div class="algo-action-bar">
+          <!-- Execute Button -->
+          <button class="algo-execute-btn" (click)="onExecute()" [disabled]="isExecuting()">
+            @if (isExecuting()) {
+              <span class="algo-spinner"></span>
+              Ejecutando...
+            } @else {
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:18px;height:18px">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" />
+              </svg>
+              Ejecutar Algoritmo
+            }
+          </button>
 
-        <!-- Metric Cards -->
-        <div class="algo-metrics">
-          <div class="algo-metric-card">
-            <span class="algo-metric-label">Tiempo de Ejecución</span>
-            <span class="algo-metric-value">
-              @if (executionTimeMs() !== null) {
-                {{ executionTimeMs() | number:'1.2-2' }} <small>ms</small>
-              } @else {
-                <span class="algo-metric-placeholder">-- ms</span>
-              }
-            </span>
-          </div>
-          <div class="algo-metric-card">
-            <span class="algo-metric-label">Registros Ordenados</span>
-            <span class="algo-metric-value">
-              @if (recordsSorted() !== null) {
-                {{ recordsSorted() | number }}
-              } @else {
-                <span class="algo-metric-placeholder">--</span>
-              }
-            </span>
+          <!-- Metric Cards -->
+          <div class="algo-metrics">
+            <div class="algo-metric-card">
+              <span class="algo-metric-label">Tiempo de Ejecución</span>
+              <span class="algo-metric-value">
+                @if (executionTimeMs() !== null) {
+                  {{ executionTimeMs() | number:'1.2-2' }} <small>ms</small>
+                } @else {
+                  <span class="algo-metric-placeholder">-- ms</span>
+                }
+              </span>
+            </div>
+            <div class="algo-metric-card">
+              <span class="algo-metric-label">Registros Ordenados</span>
+              <span class="algo-metric-value">
+                @if (recordsSorted() !== null) {
+                  {{ recordsSorted() | number }}
+                } @else {
+                  <span class="algo-metric-placeholder">--</span>
+                }
+              </span>
+            </div>
           </div>
         </div>
 
