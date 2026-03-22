@@ -1191,12 +1191,12 @@
   justify-content: space-between;
   padding: 0.6rem 1rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(0, 0, 0, 0.02);
+  background: $gray-100;
   flex-shrink: 0;
 
   :host-context(.dark) & {
-    border-color: rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(30, 41, 59, 0.98);
   }
 }
 
@@ -1298,6 +1298,15 @@
   cursor: grab;
   touch-action: none;
   min-height: 0;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+
+  :host-context(.dark) & {
+    background:
+      radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.04) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
 
   &.is-dragging {
     cursor: grabbing;
