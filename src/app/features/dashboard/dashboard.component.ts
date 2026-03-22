@@ -1,11 +1,9 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import {
-  SortChartComponent,
-  ResultsTableComponent,
-  TopVolumeComponent
-} from './components';
+import { SortChartComponent } from './components/sort-chart/sort-chart.component';
+import { ResultsTableComponent } from './components/results-table/results-table.component';
+import { TopVolumeComponent } from './components/top-volume/top-volume.component';
 
 import { ALGORITHMS } from '@core/data/algorithms.data';
 import { ApiService } from '@core';
