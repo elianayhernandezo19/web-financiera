@@ -7,8 +7,11 @@
     <section class="cmd-race-track glass-panel">
       <header class="cmd-panel-header">
         <h2 class="cmd-section-title">Carrera de Algoritmos (Benchmark)</h2>
-        <button class="cmd-btn-play" (click)="onSimulateRace()" [disabled]="isRacing()" title="Ejecutar Carrera">
-          @if (isRacing()) {
+        <button class="cmd-btn-play" (click)="onSimulateRace()" [disabled]="isRacing() || isExecutingApi()" title="Ejecutar Carrera">
+          @if (isExecutingApi()) {
+            <span class="cmd-pulse"></span>
+            Procesando ( Backend )...
+          } @else if (isRacing()) {
             <span class="cmd-pulse"></span>
             Simulando...
           } @else {

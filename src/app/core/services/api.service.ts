@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
-import type { SortRequest, ApiResponse, SortExecutionResult } from '../models';
+import type { SortRequest, ApiResponse, SortExecutionResult, RaceData } from '../models';
 
 /**
  * ApiService — única capa de comunicación con el backend Node.js.
@@ -30,6 +30,15 @@ export class ApiService {
   executeSort(request: SortRequest): Observable<ApiResponse<SortExecutionResult>> {
     return this.http
       .get<ApiResponse<SortExecutionResult>>(`${this.BASE_URL}/algoritmos/${request.algorithm}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  /**
+   * Ejecuta la carrera completa contra todos los algoritmos
+   */
+  runRace(): Observable<ApiResponse<RaceData>> {
+    return this.http
+      .get<ApiResponse<RaceData>>(`${this.BASE_URL}/algoritmos/carrera`)
       .pipe(catchError(this.handleError));
   }
 

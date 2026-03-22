@@ -45,6 +45,23 @@ export interface SortExecutionResult {
   readonly data: SortRecord[];
 }
 
+export interface RaceResultItem {
+  readonly position: number;
+  readonly algorithm: string;
+  readonly executionTimeMs: number;
+  readonly error: string | null;
+}
+
+export interface RaceData {
+  readonly asset: string;
+  readonly dataSize: number;
+  readonly mode: string;
+  readonly threads: number;
+  readonly cpuCores: number;
+  readonly wallClockMs: number;
+  readonly raceResults: RaceResultItem[];
+}
+
 export interface ApiResponse<T> {
   readonly success: boolean;
   readonly data: T;

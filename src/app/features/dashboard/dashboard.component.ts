@@ -23,6 +23,7 @@ export class DashboardComponent {
 
   // ── Estados UI ──
   readonly isRacing = signal<boolean>(false);
+  readonly isExecutingApi = signal<boolean>(false);
   readonly isFullscreen = signal<boolean>(false);
 
   // ── Datos (Signals Generales) ──
@@ -57,14 +58,46 @@ export class DashboardComponent {
     this.isFullscreen.update(v => !v);
   }
 
-  // ── Simulación Visual de Carrera (Mocks) ──
+  // ── Simulación Visual de Carrera (Real API o Fallback) ──
   onSimulateRace(): void {
-    if (this.isRacing()) return;
-    this.isRacing.set(true);
+    if (this.isRacing() || this.isExecutingApi()) return;
+    
+    this.isExecutingApi.set(true);
     this.initializeEmptyRace();
 
-    // Valores finales inspirados en la captura del usuario
-    const targetTimes: Record<string, number> = {
+    // Llamar al endpoint real de Node.js (toma bastante tiempo por los 63k registros en todos los algos)
+    this.api.runRace().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (response) => {
+        this.isExecutingApi.set(false);
+        if (response.success && response.data?.raceResults) {
+          // Extraer los tiempos reales del backend
+          const realTimes: Record<string, number> = {};
+          response.data.raceResults.forEach(r => {
+            // Normalizar el nombre para mapear con ALGORITHMS id
+            const normalizedId = r.algorithm.toLowerCase().replace(/\s/g, '');
+            // Si hay error de TIMEOUT, asignar un tiempo muy alto o el máximo esperado
+            realTimes[normalizedId] = r.error ? 60000 : r.executionTimeMs;
+          });
+          this.startVisualRace(realTimes);
+        } else {
+          this.startVisualRace(null); // usar mocks por defecto
+        }
+      },
+      error: (err) => {
+        console.error('Error contacting backend, using mocks...', err);
+        this.isExecutingApi.set(false);
+        this.startVisualRace(null); // fallback
+      }
+    });
+  }
+
+  private startVisualRace(apiTimes: Record<string, number> | null): void {
+    this.isRacing.set(true);
+    
+    // Valores por defecto si la API falla o devuelve nulo
+    const targetTimes: Record<string, number> = apiTimes || {
       pigeonholesort: 50.7,
       timsort: 1163.9,
       radixsort: 122.3,
@@ -84,28 +117,25 @@ export class DashboardComponent {
     const intervalTime = 16;
     
     // Obtenemos el tiempo máximo que tomará el más lento
-    // Usamos ALGORITHMS para mapear, asegurando que todos tengan un default
     let maxTime = 0;
     ALGORITHMS.forEach(a => {
-      const t = targetTimes[a.id.toLowerCase().replace(/\s/g, '')] || targetTimes[a.id] || targetTimes[a.name.toLowerCase().replace(/\s/g, '')] || Math.random() * 5000 + 1000;
-      targetTimes[a.id] = t; // normalizar la key al ID official
+      const normalizedId = a.id.toLowerCase().replace(/\s/g, '');
+      const t = targetTimes[normalizedId] || targetTimes[a.id] || targetTimes[a.name.toLowerCase().replace(/\s/g, '')] || Math.random() * 5000 + 1000;
+      targetTimes[a.id] = t; // re-asignar para un acceso seguro uniforme abajo
       if (t > maxTime) maxTime = t;
     });
 
-    // Función de Easing (Ease Out Quart) para que el "cronómetro" empiece rápido y ralentice al final
     const easeOutQuart = (x: number): number => 1 - Math.pow(1 - x, 4);
 
     const interval = setInterval(() => {
       step++;
-      const progress = step / maxSteps; // 0 a 1
+      const progress = step / maxSteps; 
       const easedProgress = easeOutQuart(progress);
       
-      // El "cronómetro" global simulado
       const currentTimeObj = maxTime * easedProgress;
 
       const currentEntries = ALGORITHMS.map(algo => {
         const target = targetTimes[algo.id];
-        // La barra avanza junto con el cronómetro, PERO se detiene en su target final
         const currentVal = Math.min(currentTimeObj, target);
         
         return {
@@ -115,9 +145,6 @@ export class DashboardComponent {
         };
       });
 
-      // ORDENAMIENTO EN TIEMPO REAL:
-      // Los ganadores (menor tiempo) suben. Durante la carrera, los que siguen corriendo están empatados en `currentTimeObj`.
-      // Para evitar que los empatados salten visualmente, el desempate se hace por el target final.
       currentEntries.sort((a, b) => {
         if (a.timeMs === b.timeMs) {
            return targetTimes[a.algorithmId] - targetTimes[b.algorithmId];
