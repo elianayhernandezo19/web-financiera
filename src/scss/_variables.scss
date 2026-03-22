@@ -1,0 +1,97 @@
+// ═══════════════════════════════════════════════════════════════
+// Design Tokens — Variables globales del sistema financiero
+// ═══════════════════════════════════════════════════════════════
+
+// ── Colores de marca (emerald financiero) ──
+$brand-50:  #ecfdf5;
+$brand-100: #d1fae5;
+$brand-200: #a7f3d0;
+$brand-300: #6ee7b7;
+$brand-400: #34d399;
+$brand-500: #10b981;
+$brand-600: #059669;
+$brand-700: #047857;
+$brand-800: #065f46;
+$brand-900: #064e3b;
+$brand-950: #022c22;
+
+// ── Grays (slate palette) ──
+$gray-50:  #f8fafc;
+$gray-100: #f1f5f9;
+$gray-200: #e2e8f0;
+$gray-300: #cbd5e1;
+$gray-400: #94a3b8;
+$gray-500: #64748b;
+$gray-600: #475569;
+$gray-700: #334155;
+$gray-800: #1e293b;
+$gray-900: #0f172a;
+$gray-950: #020617;
+
+// ── Semánticos ──
+$red-400:    #f87171;
+$red-500:    #ef4444;
+$red-700:    #b91c1c;
+$amber-400:  #fbbf24;
+$amber-500:  #f59e0b;
+$blue-400:   #60a5fa;
+$blue-500:   #3b82f6;
+$blue-600:   #2563eb;
+
+// ── Superficies ──
+$surface-light:         #ffffff;
+$surface-light-alt:     $gray-50;
+$surface-dark:          $gray-950;
+$surface-dark-card:     rgba(255, 255, 255, 0.025);
+$surface-dark-card-alt: rgba(255, 255, 255, 0.04);
+
+// ── Bordes ──
+$border-light:    rgba(0, 0, 0, 0.08);
+$border-light-s:  $gray-200;
+$border-dark:     rgba(255, 255, 255, 0.07);
+$border-dark-s:   rgba(255, 255, 255, 0.05);
+
+// ── Tipografía ──
+$font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+$text-xs:   0.75rem;   // 12px
+$text-sm:   0.875rem;  // 14px
+$text-base: 1rem;      // 16px
+$text-lg:   1.125rem;  // 18px
+$text-xl:   1.25rem;   // 20px
+$text-2xl:  1.5rem;    // 24px
+$text-3xl:  1.875rem;  // 30px
+$text-4xl:  2.25rem;   // 36px
+$text-5xl:  3rem;      // 48px
+
+// ── Sombras ──
+$shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+$shadow-glow: 0 0 14px rgba(16, 185, 129, 0.18);
+
+// ── Bordes redondeados ──
+$radius-md:  0.5rem;
+$radius-lg:  0.75rem;
+$radius-xl:  1rem;
+$radius-2xl: 1.25rem;
+$radius-full: 9999px;
+
+// ── Transiciones ──
+$transition-fast:   150ms ease;
+$transition-base:   200ms ease;
+$transition-smooth: 300ms ease;
+
+// ── Breakpoints ──
+$bp-sm:  640px;
+$bp-md:  768px;
+$bp-lg:  1024px;
+$bp-xl:  1280px;
+$bp-2xl: 1536px;
+
+// ── Z-index ──
+$z-base:    1;
+$z-sticky:  10;
+$z-navbar:  50;
+$z-overlay: 100;

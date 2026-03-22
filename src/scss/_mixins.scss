@@ -1,0 +1,190 @@
+// ═══════════════════════════════════════════════════════════════
+// Mixins reutilizables
+// ═══════════════════════════════════════════════════════════════
+@use 'variables' as *;
+
+// ── Responsive ──
+@mixin sm  { @media (min-width: $bp-sm)  { @content; } }
+@mixin md  { @media (min-width: $bp-md)  { @content; } }
+@mixin lg  { @media (min-width: $bp-lg)  { @content; } }
+@mixin xl  { @media (min-width: $bp-xl)  { @content; } }
+@mixin xxl { @media (min-width: $bp-2xl) { @content; } }
+
+// ── Glassmorphism card ──
+@mixin glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid $border-light;
+  border-radius: $radius-2xl;
+  box-shadow: $shadow-sm, 0 4px 16px rgba(0, 0, 0, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all $transition-smooth;
+  padding: 1.25rem;
+
+  &:hover {
+    box-shadow: $shadow-md, 0 8px 24px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+  }
+
+  :host-context(.dark) & {
+    background: $surface-dark-card;
+    border-color: $border-dark;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      background: $surface-dark-card-alt;
+      box-shadow: 0 0 0 1px rgba($brand-500, 0.08), 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+  }
+}
+
+// ── Navbar blur (glassmorphism ligero) ──
+@mixin glass-navbar {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+// ── Glow text ──
+@mixin glow-text($color: $brand-500) {
+  text-shadow: 0 0 32px rgba($color, 0.5), 0 0 8px rgba($color, 0.25);
+}
+
+// ── Truncar texto ──
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ── Grid de dashboard ──
+@mixin dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+
+  @include xl {
+    grid-template-columns: 1fr 2fr;
+  }
+}
+
+// ── Focus ring accesible ──
+@mixin focus-ring($color: $brand-500) {
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba($color, 0.5);
+  }
+  &:focus:not(:focus-visible) {
+    box-shadow: none;
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba($color, 0.5);
+  }
+}
+
+// ── Botón primario ──
+@mixin btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: $text-sm;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, $brand-600, $brand-500);
+  border: none;
+  border-radius: $radius-xl;
+  box-shadow: 0 4px 14px rgba($brand-600, 0.25);
+  cursor: pointer;
+  transition: all $transition-base;
+  @include focus-ring;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, $brand-500, $brand-400);
+    box-shadow: 0 6px 20px rgba($brand-500, 0.35);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    background: $gray-200;
+    color: $gray-400;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  :host-context(.dark) & {
+    &:disabled {
+      background: rgba($gray-700, 0.6);
+      color: $gray-500;
+    }
+  }
+}
+
+// ── Select estilizado ──
+@mixin styled-select {
+  width: 100%;
+  appearance: none;
+  cursor: pointer;
+  background: rgba($gray-100, 0.7);
+  border: 1px solid $gray-200;
+  color: $gray-800;
+  border-radius: $radius-xl;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  font-size: $text-sm;
+  font-weight: 500;
+  transition: all $transition-base;
+  @include focus-ring;
+
+  &:hover {
+    border-color: $gray-300;
+  }
+
+  :host-context(.dark) & {
+    background: $surface-dark-card-alt;
+    border-color: rgba(255, 255, 255, 0.08);
+    color: $gray-200;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    option {
+      background: $gray-800;
+    }
+  }
+}
+
+// ── Label de formulario ──
+@mixin form-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: $gray-500;
+  margin-bottom: 0.5rem;
+
+  :host-context(.dark) & {
+    color: $gray-400;
+  }
+}
+
+// ── Section title ──
+@mixin section-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 1rem;
+  color: $gray-400;
+
+  :host-context(.dark) & {
+    color: $gray-500;
+  }
+}
