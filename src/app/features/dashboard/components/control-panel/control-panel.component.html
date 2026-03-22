@@ -1,44 +1,52 @@
-<div class="flex flex-col gap-4 sm:flex-row sm:items-end">
+<div class="flex flex-col gap-5">
 
-  <!-- Selector de algoritmo -->
-  <div class="flex-1">
-    <label for="algorithmSelect"
-           class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-      Algoritmo
-    </label>
-    <select
-      id="algorithmSelect"
-      [value]="selectedId()"
-      (change)="onSelectChange($event)"
-      class="w-full bg-gray-800 border border-gray-700 text-gray-100 rounded-lg px-4 py-2.5
-             focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent
-             transition-colors cursor-pointer"
+  <!-- ── Selector de algoritmo ── -->
+  <div>
+    <label
+      for="algorithmSelect"
+      class="block text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-[0.15em] mb-2"
     >
-      @for (algo of algorithms(); track algo.id) {
-        <option [value]="algo.id">{{ algo.name }}</option>
-      }
-    </select>
+      Algoritmo de Ordenamiento
+    </label>
+    <!-- Wrapper relativo para el chevron personalizado -->
+    <div class="relative">
+      <select
+        id="algorithmSelect"
+        [value]="selectedId()"
+        (change)="onSelectChange($event)"
+        class="fin-select pr-10"
+      >
+        @for (algo of algorithms(); track algo.id) {
+          <option [value]="algo.id" class="bg-white dark:bg-slate-800">{{ algo.name }}</option>
+        }
+      </select>
+      <!-- Ícono chevron custom -->
+      <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </span>
+    </div>
   </div>
 
-  <!-- Botón de ejecución -->
+  <!-- ── Divisor visual ── -->
+  <div class="border-t border-gray-100 dark:border-white/[0.05]"></div>
+
+  <!-- ── Botón de ejecución ── -->
   <button
     (click)="onExecute()"
     [disabled]="isLoading()"
-    class="inline-flex items-center justify-center gap-2 min-w-44
-           bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700
-           disabled:bg-gray-700 disabled:cursor-not-allowed
-           text-white font-semibold px-6 py-2.5 rounded-lg
-           transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
+    class="btn-primary w-full"
+    [class.animate-pulse-glow]="isLoading()"
   >
     @if (isLoading()) {
-      <!-- Spinner SVG inline: sin dependencias externas -->
-      <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <svg class="animate-spin h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
       </svg>
       Ejecutando…
     } @else {
-      <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 16 16">
+      <svg class="h-4 w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
         <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
       </svg>
       Ejecutar Ordenamiento

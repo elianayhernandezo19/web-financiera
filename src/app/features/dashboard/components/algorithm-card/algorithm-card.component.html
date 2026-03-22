@@ -1,40 +1,82 @@
 <div class="flex flex-col gap-4">
-  <!-- Descripción -->
-  <p class="text-gray-400 text-sm leading-relaxed">{{ algorithm().description }}</p>
 
-  <!-- Cuadrícula Big O -->
-  <div class="grid grid-cols-2 gap-3 text-sm">
+  <!--
+    Hero Big O — elemento visual central de la ficha técnica.
+    El glow verde simula el resplandor de un ticker en terminal Bloomberg.
+  -->
+  <div
+    class="relative overflow-hidden rounded-2xl
+           bg-gradient-to-br from-brand-500/[0.07] to-brand-600/[0.02]
+           dark:from-brand-400/[0.09] dark:to-brand-600/[0.01]
+           border border-brand-500/10 dark:border-brand-400/10
+           p-5 text-center"
+  >
+    <!-- Glow radial ambiental -->
+    <div
+      class="absolute inset-0 pointer-events-none
+             [background:radial-gradient(circle_at_50%_60%,rgba(16,185,129,0.07),transparent_70%)]"
+      aria-hidden="true"
+    ></div>
+    <p class="text-[9px] font-bold text-brand-600 dark:text-brand-500 uppercase tracking-[0.2em] mb-2">
+      Complejidad Promedio
+    </p>
+    <code class="relative font-mono font-black text-4xl md:text-5xl
+                 text-brand-600 dark:text-brand-400 glow-brand tracking-tight">
+      {{ algorithm().averageCase }}
+    </code>
+  </div>
 
-    <div class="bg-gray-950/70 border border-gray-800 rounded-lg p-3">
-      <p class="text-gray-600 text-xs uppercase tracking-wider mb-1.5">Mejor Caso</p>
-      <code class="text-emerald-400 font-mono font-bold text-base">{{ algorithm().bestCase }}</code>
+  <!-- Descripción del algoritmo -->
+  <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+    {{ algorithm().description }}
+  </p>
+
+  <!-- Grid de complejidades Big O -->
+  <div class="grid grid-cols-2 gap-2">
+
+    <div class="rounded-xl border border-gray-100 dark:border-white/[0.05] bg-gray-50 dark:bg-white/[0.02] p-3">
+      <p class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-1.5">Mejor caso</p>
+      <code class="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">{{ algorithm().bestCase }}</code>
     </div>
 
-    <div class="bg-gray-950/70 border border-gray-800 rounded-lg p-3">
-      <p class="text-gray-600 text-xs uppercase tracking-wider mb-1.5">Caso Promedio</p>
-      <code class="text-yellow-400 font-mono font-bold text-base">{{ algorithm().averageCase }}</code>
+    <div class="rounded-xl border border-gray-100 dark:border-white/[0.05] bg-gray-50 dark:bg-white/[0.02] p-3">
+      <p class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-1.5">Promedio</p>
+      <code class="font-mono font-bold text-sm text-amber-500 dark:text-amber-400">{{ algorithm().averageCase }}</code>
     </div>
 
-    <div class="bg-gray-950/70 border border-gray-800 rounded-lg p-3">
-      <p class="text-gray-600 text-xs uppercase tracking-wider mb-1.5">Peor Caso</p>
-      <code class="text-red-400 font-mono font-bold text-base">{{ algorithm().worstCase }}</code>
+    <div class="rounded-xl border border-gray-100 dark:border-white/[0.05] bg-gray-50 dark:bg-white/[0.02] p-3">
+      <p class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-1.5">Peor caso</p>
+      <code class="font-mono font-bold text-sm text-red-500 dark:text-red-400">{{ algorithm().worstCase }}</code>
     </div>
 
-    <div class="bg-gray-950/70 border border-gray-800 rounded-lg p-3">
-      <p class="text-gray-600 text-xs uppercase tracking-wider mb-1.5">Espacio</p>
-      <code class="text-blue-400 font-mono font-bold text-base">{{ algorithm().spaceComplexity }}</code>
+    <div class="rounded-xl border border-gray-100 dark:border-white/[0.05] bg-gray-50 dark:bg-white/[0.02] p-3">
+      <p class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-1.5">Espacio</p>
+      <code class="font-mono font-bold text-sm text-accent-500 dark:text-accent-400">{{ algorithm().spaceComplexity }}</code>
     </div>
 
   </div>
 
-  <!-- Indicador de estabilidad -->
-  <div class="flex items-center gap-2 pt-1">
+  <!-- Badge de estabilidad -->
+  @if (algorithm().stable) {
     <span
-      class="inline-block w-2.5 h-2.5 rounded-full"
-      [class]="algorithm().stable ? 'bg-emerald-400' : 'bg-red-400'"
-    ></span>
-    <span class="text-xs text-gray-500">
-      {{ algorithm().stable ? 'Algoritmo Estable' : 'Algoritmo Inestable' }}
+      class="inline-flex items-center gap-1.5 self-start rounded-full px-3 py-1.5 text-xs font-medium
+             bg-emerald-50 dark:bg-emerald-400/[0.08]
+             text-emerald-700 dark:text-emerald-400
+             ring-1 ring-emerald-200 dark:ring-emerald-400/20"
+    >
+      <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-500"></span>
+      Algoritmo Estable
     </span>
-  </div>
+  } @else {
+    <span
+      class="inline-flex items-center gap-1.5 self-start rounded-full px-3 py-1.5 text-xs font-medium
+             bg-red-50 dark:bg-red-400/[0.08]
+             text-red-700 dark:text-red-400
+             ring-1 ring-red-200 dark:ring-red-400/20"
+    >
+      <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500"></span>
+      Algoritmo Inestable
+    </span>
+  }
+
 </div>

@@ -1,36 +1,156 @@
 /*
  * Tailwind CSS v4 — la única importación necesaria.
- * En v4 no se requiere tailwind.config.js; la configuración vive aquí en CSS.
- * Nota: se usa @use (sintaxis Sass moderna) para evitar la deprecación de @import.
- * Angular 21 + @angular/build procesan esta directiva via el plugin PostCSS integrado.
+ * En v4 NO se requiere tailwind.config.js; toda la configuración vive aquí en CSS
+ * mediante el bloque @theme. Las fuentes se cargan desde index.html via <link>.
  */
 @use "tailwindcss";
 
+/* ════════════════════════════════════════════════════════════════
+ * @theme — Tokens de diseño personalizados (Tailwind v4 nativo).
+ *
+ * Generan utilidades automáticamente:
+ *   --color-brand-500  →  bg-brand-500 / text-brand-500 / border-brand-500 / etc.
+ *   --font-sans        →  font-sans (sobreescribe el stack genérico de Tailwind)
+ *
+ * NO se necesita tailwind.config.js en Tailwind v4.
+ * ════════════════════════════════════════════════════════════════ */
+@theme {
+  /* ── Tipografía ── */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  /* ── Paleta primaria: verde esmeralda (brand) ── */
+  --color-brand-50:  #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-200: #a7f3d0;
+  --color-brand-300: #6ee7b7;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+  --color-brand-800: #065f46;
+  --color-brand-900: #064e3b;
+  --color-brand-950: #022c22;
+
+  /* ── Acento azul (gráficas e indicadores informativos) ── */
+  --color-accent-300: #93c5fd;
+  --color-accent-400: #60a5fa;
+  --color-accent-500: #3b82f6;
+  --color-accent-600: #2563eb;
+
+  /* ── Rojo bajada / peligro ── */
+  --color-danger-400: #f87171;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+}
+
 /*
- * Declara la variante `dark` basada en la clase `.dark` en el elemento padre.
- * Al agregar class="dark" al <html> en index.html, todas las clases `dark:`
- * de Tailwind se activan globalmente (modo oscuro forzado).
+ * Variante dark: se activa cuando el elemento está dentro de un ancestro .dark.
+ * ThemeService sincroniza class="dark" en <html> vía effect().
  */
 @custom-variant dark (&:is(.dark *));
 
-/* ── Utilidades globales reutilizables ── */
+/* ════════════════════════════════════════════════════════════════
+ * Componentes reutilizables (@layer components).
+ * Se compilan como CSS normal y están disponibles como clases de utilidad.
+ * ════════════════════════════════════════════════════════════════ */
 @layer components {
-  /*
-   * Título de sección usado en DashboardComponent (4 repeticiones).
-   * Centralizar aquí evita duplicar la cadena de clases en el template.
-   */
+  /* Título de sección del dashboard (usado en 4 tarjetas) */
   .section-title {
-    @apply text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4;
+    @apply text-[10px] font-semibold text-gray-400 dark:text-gray-500
+           uppercase tracking-[0.15em] mb-4;
+  }
+
+  /*
+   * Tarjeta glassmorphism — fondo semitransparente + blur + borde sutil.
+   * Uso: <section class="glass-card p-5">
+   */
+  .glass-card {
+    @apply bg-white dark:bg-white/[0.025]
+           border border-gray-200/80 dark:border-white/[0.07]
+           rounded-2xl shadow-sm dark:shadow-none
+           backdrop-blur-sm;
+  }
+
+  /* Select estilizado con chevron externo */
+  .fin-select {
+    @apply w-full appearance-none cursor-pointer
+           bg-gray-100/70 dark:bg-white/[0.04]
+           border border-gray-200 dark:border-white/[0.08]
+           text-gray-800 dark:text-gray-200
+           rounded-xl px-4 py-3
+           text-sm font-medium
+           transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/40
+           hover:border-gray-300 dark:hover:border-white/20;
+  }
+
+  /* Botón de acción principal */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2
+           bg-brand-600 hover:bg-brand-500 active:scale-[0.98]
+           disabled:bg-gray-200 dark:disabled:bg-gray-700/60
+           disabled:text-gray-400 dark:disabled:text-gray-500
+           disabled:cursor-not-allowed disabled:shadow-none disabled:scale-100
+           text-white font-semibold text-sm
+           px-6 py-3 rounded-xl
+           shadow-lg shadow-brand-600/20 hover:shadow-brand-500/30
+           transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-brand-500/60
+           focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-950;
+  }
+
+  /* Valor de cierre positivo (trading) */
+  .fin-up {
+    @apply text-brand-600 dark:text-brand-400 font-semibold tabular-nums;
+  }
+
+  /* Valor negativo / bajada */
+  .fin-down {
+    @apply text-danger-600 dark:text-danger-400 font-semibold tabular-nums;
   }
 }
 
-/* Suaviza el scroll en toda la aplicación */
+/* ════════════════════════════════════════════════════════════════
+ * Animaciones y utilidades personalizadas
+ * ════════════════════════════════════════════════════════════════ */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  50%       { box-shadow: 0 0 24px 4px rgba(16, 185, 129, 0.18); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@layer utilities {
+  .animate-fade-in-up {
+    animation: fade-in-up 0.35s ease-out both;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  /* Resplandor verde esmeralda para el Big O hero */
+  .glow-brand {
+    text-shadow: 0 0 32px rgba(16, 185, 129, 0.5), 0 0 8px rgba(16, 185, 129, 0.25);
+  }
+}
+
+/* ── Scroll behavior ── */
 html {
   scroll-behavior: smooth;
 }
 
-/* Estilo de la barra de scroll en navegadores Webkit (Dark mode) */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #111827; }
-::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+/* Scrollbar light mode */
+::-webkit-scrollbar              { width: 5px; height: 5px; }
+::-webkit-scrollbar-track        { background: #f1f5f9; }
+::-webkit-scrollbar-thumb        { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover  { background: #94a3b8; }
+
+/* Scrollbar dark mode */
+html.dark ::-webkit-scrollbar-track       { background: #0f172a; }
+html.dark ::-webkit-scrollbar-thumb       { background: #334155; border-radius: 3px; }
+html.dark ::-webkit-scrollbar-thumb:hover { background: #475569; }

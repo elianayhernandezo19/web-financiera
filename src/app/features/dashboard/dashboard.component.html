@@ -1,136 +1,153 @@
-<div class="min-h-screen bg-gray-950 text-gray-100 p-4 md:p-8">
+<!--
+  DashboardComponent — layout principal del visualizador financiero.
 
-  <!-- ══════════════════════════ HEADER ══════════════════════════ -->
-  <header class="mb-8 flex flex-wrap items-start justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight">
-        Análisis de Algoritmos
-        <span class="text-emerald-400">— Fase 2</span>
-      </h1>
-      <p class="text-gray-500 text-sm mt-1">
-        Universidad del Quindío · Panel Comparativo de Ordenamiento Financiero
-      </p>
-    </div>
+  Estructura (CSS Grid responsive):
+  ┌─────────────────────────────────────────────────────────┐
+  │  BARRA DE MÉTRICAS RÁPIDAS (flex, full width)           │
+  ├──────────────────┬──────────────────────────────────────┤
+  │  Panel Control   │  Gráfica comparativa (Chart.js)      │
+  │  ─────────────   │  ──────────────────────────────────  │
+  │  Ficha Técnica   │  Tabla de Datos (CDK Virtual Scroll) │
+  └──────────────────┴──────────────────────────────────────┘
+  En pantallas < xl (1280px) las columnas se apilan verticalmente.
+-->
+<div class="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 sm:p-6 lg:p-8 transition-colors duration-300">
+  <div class="relative max-w-screen-2xl mx-auto">
 
-    <!-- Métricas rápidas (sólo en pantallas medianas+) -->
-    <div class="flex items-center gap-5 text-sm">
-      <div class="text-center">
-        <p class="text-gray-600 text-xs uppercase tracking-wider">Ejecuciones</p>
-        <p class="text-white font-bold text-xl tabular-nums">{{ totalExecutions() }}</p>
+    <!-- ════════════ BARRA DE MÉTRICAS RÁPIDAS ════════════ -->
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+
+      <div class="flex items-center gap-5 sm:gap-7">
+        <!-- Ejecuciones totales -->
+        <div class="flex items-center gap-2.5">
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 dark:bg-white/[0.05] ring-1 ring-gray-200 dark:ring-white/[0.07]">
+            <svg class="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5V19a1 1 0 001 1h4v-6H3zm7-4.5V19a1 1 0 001 1h4V9h-4zm7 3V19a1 1 0 001 1h4v-7h-4z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-[9px] font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-widest leading-none mb-0.5">Ejecuciones</p>
+            <p class="text-lg font-bold tabular-nums leading-none text-gray-800 dark:text-white">{{ totalExecutions() }}</p>
+          </div>
+        </div>
+
+        <!-- Tiempo del último algoritmo -->
+        @if (lastExecutionTime() !== null) {
+          <div class="flex items-center gap-2.5">
+            <div class="relative flex h-7 w-7 items-center justify-center rounded-lg bg-brand-500/10 dark:bg-brand-400/[0.08] ring-1 ring-brand-500/20">
+              <!-- Indicador de pulso (activo) -->
+              <span class="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-500 opacity-60"></span>
+                <span class="relative inline-flex h-2 w-2 rounded-full bg-brand-500"></span>
+              </span>
+              <svg class="h-3.5 w-3.5 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-[9px] font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-widest leading-none mb-0.5">Último tiempo</p>
+              <p class="text-lg font-bold tabular-nums leading-none text-brand-600 dark:text-brand-400">
+                {{ lastExecutionTime()! | number: '1.0-3' }}<span class="text-xs font-normal text-gray-400 dark:text-gray-600 ml-0.5">ms</span>
+              </p>
+            </div>
+          </div>
+        }
       </div>
 
-      @if (lastExecutionTime() !== null) {
-        <div class="text-center">
-          <p class="text-gray-600 text-xs uppercase tracking-wider">Último tiempo</p>
-          <p class="text-emerald-400 font-bold text-xl tabular-nums">
-            {{ lastExecutionTime()! | number: '1.0-3' }}<span class="text-sm font-normal text-gray-500"> ms</span>
-          </p>
-        </div>
-      }
-
+      <!-- Botón limpiar historial -->
       @if (totalExecutions() > 0) {
         <button
           (click)="clearHistory()"
-          class="text-xs text-gray-600 hover:text-red-400 transition-colors underline underline-offset-2"
+          class="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-600
+                 hover:text-red-500 dark:hover:text-red-400
+                 transition-colors duration-200 group"
         >
+          <svg class="h-3.5 w-3.5 group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
           Limpiar historial
         </button>
       }
     </div>
-  </header>
 
-  <!-- ══════════════════════════ ALERTA ERROR ══════════════════════════ -->
-  @if (errorMessage()) {
-    <div class="mb-6 flex items-start gap-3
-                bg-red-950/60 border border-red-800/80 text-red-300
-                rounded-xl p-4 text-sm">
-      <svg class="h-5 w-5 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-      </svg>
-      <p>{{ errorMessage() }}</p>
+    <!-- ════════════ ALERTA DE ERROR ════════════ -->
+    @if (errorMessage()) {
+      <div
+        class="mb-5 animate-fade-in-up
+               flex items-start gap-3
+               bg-red-50 dark:bg-red-950/40
+               border border-red-200 dark:border-red-800/50
+               text-red-700 dark:text-red-300
+               rounded-xl p-4 text-sm"
+      >
+        <svg class="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+        <p>{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <!-- ════════════ GRID PRINCIPAL ════════════ -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+
+      <!-- ─── COLUMNA IZQUIERDA (sidebar) ─── -->
+      <div class="xl:col-span-1 flex flex-col gap-5">
+
+        <!-- ① PANEL DE CONTROL -->
+        <section class="glass-card p-5 animate-fade-in-up" style="animation-delay: 0ms">
+          <h2 class="section-title">Panel de Control</h2>
+          <app-control-panel
+            [algorithms]="algorithms"
+            [selectedId]="selectedAlgorithmId()"
+            [isLoading]="isLoading()"
+            (algorithmSelected)="onAlgorithmSelected($event)"
+            (executeSortClicked)="onExecuteSort()"
+          />
+        </section>
+
+        <!-- ② FICHA TÉCNICA DEL ALGORITMO -->
+        <section class="glass-card p-5 flex-1 animate-fade-in-up" style="animation-delay: 60ms">
+          <h2 class="section-title">Ficha Técnica</h2>
+          <h3 class="text-sm font-bold text-gray-800 dark:text-white mb-4 truncate">
+            {{ selectedAlgorithmInfo().name }}
+          </h3>
+          <app-algorithm-card [algorithm]="selectedAlgorithmInfo()" />
+        </section>
+
+      </div>
+
+      <!-- ─── COLUMNA DERECHA (contenido principal) ─── -->
+      <div class="xl:col-span-2 flex flex-col gap-5">
+
+        <!-- ③ GRÁFICA COMPARATIVA DE TIEMPOS -->
+        <section class="glass-card p-5 animate-fade-in-up" style="animation-delay: 100ms">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="section-title">Comparativa de Tiempos de Ejecución</h2>
+            @if (totalExecutions() > 0) {
+              <span class="text-[10px] font-medium text-gray-400 dark:text-gray-600 tabular-nums">
+                {{ totalExecutions() }} {{ totalExecutions() === 1 ? 'ejecución' : 'ejecuciones' }}
+              </span>
+            }
+          </div>
+          <app-sort-chart [entries]="executionTimes()" />
+        </section>
+
+        <!-- ④ TABLA DE DATOS CON VIRTUAL SCROLL -->
+        <section class="glass-card p-5 animate-fade-in-up" style="animation-delay: 160ms">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="section-title">Datos Ordenados</h2>
+            @if (sortedData().length > 0) {
+              <span class="text-[10px] font-semibold text-brand-600 dark:text-brand-400 tabular-nums">
+                {{ sortedData().length | number }} registros
+              </span>
+            }
+          </div>
+          <app-results-table [data]="sortedData()" />
+        </section>
+
+      </div>
     </div>
-  }
 
-  <!-- ══════════════════════════ LAYOUT PRINCIPAL ══════════════════════════ -->
-  <!--
-    Grid de 3 columnas en XL:
-    - Col 1: Panel de control + Ficha técnica (ocupan todo el alto)
-    - Col 2-3: Gráfica comparativa + Tabla de resultados (apiladas)
-  -->
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-
-    <!-- ─── COLUMNA IZQUIERDA ─── -->
-    <div class="xl:col-span-1 flex flex-col gap-6">
-
-      <!-- ① PANEL DE CONTROL -->
-      <section class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-        <h2 class="section-title">Panel de Control</h2>
-
-        <!--
-          Comunicación padre → hijo via [input] y hijo → padre via (output).
-          selectedAlgorithmId() y isLoading() pasan el VALOR actual del signal,
-          no el signal en sí: el hijo recibe tipos primitivos normales.
-        -->
-        <app-control-panel
-          [algorithms]="algorithms"
-          [selectedId]="selectedAlgorithmId()"
-          [isLoading]="isLoading()"
-          (algorithmSelected)="onAlgorithmSelected($event)"
-          (executeSortClicked)="onExecuteSort()"
-        />
-      </section>
-
-      <!-- ② FICHA TÉCNICA DEL ALGORITMO SELECCIONADO -->
-      <section class="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex-1">
-        <h2 class="section-title">Ficha Técnica</h2>
-
-        <!--
-          selectedAlgorithmInfo() es una señal computed: se recalcula
-          automáticamente al cambiar selectedAlgorithmId.
-        -->
-        <h3 class="text-xl font-bold text-white mb-4">
-          {{ selectedAlgorithmInfo().name }}
-        </h3>
-
-        <app-algorithm-card [algorithm]="selectedAlgorithmInfo()" />
-      </section>
-
-    </div>
-
-    <!-- ─── COLUMNA DERECHA ─── -->
-    <div class="xl:col-span-2 flex flex-col gap-6">
-
-      <!-- ③ GRÁFICA COMPARATIVA DE TIEMPOS -->
-      <section class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="section-title">Comparativa de Tiempos de Ejecución</h2>
-          @if (totalExecutions() > 0) {
-            <span class="text-xs text-gray-600 tabular-nums">
-              {{ totalExecutions() }} {{ totalExecutions() === 1 ? 'ejecución' : 'ejecuciones' }}
-            </span>
-          }
-        </div>
-
-        <!-- executionTimes() pasa el array actual del signal al componente hijo -->
-        <app-sort-chart [entries]="executionTimes()" />
-      </section>
-
-      <!-- ④ TABLA DE RESULTADOS CON VIRTUAL SCROLL -->
-      <section class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="section-title">Datos Ordenados</h2>
-          @if (sortedData().length > 0) {
-            <span class="text-xs text-emerald-600 tabular-nums">
-              {{ sortedData().length | number }} registros
-            </span>
-          }
-        </div>
-
-        <app-results-table [data]="sortedData()" />
-      </section>
-
-    </div>
   </div>
-
 </div>
+
