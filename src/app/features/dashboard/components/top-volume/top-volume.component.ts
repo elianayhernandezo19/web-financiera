@@ -10,5 +10,5 @@ import { DatePipe, DecimalPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TopVolumeComponent {
-  readonly data = input.required<{ date: string; volume: number }[]>();
+  readonly data = input.required<{ symbol: string; date: string; volume: number }[]>();
 }
