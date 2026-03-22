@@ -395,7 +395,7 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
       const pad = 24;
       const fitW = (vpW - pad) / svgW;
       const fitH = (vpH - pad) / svgH;
-      zoom = Math.min(fitW, fitH, 1); // never exceed 100%
+      zoom = Math.min(fitW, fitH);
       zoom = Math.max(0.05, zoom);
 
       // Center the diagram

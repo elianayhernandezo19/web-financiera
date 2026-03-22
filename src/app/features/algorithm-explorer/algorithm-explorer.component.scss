@@ -510,9 +510,9 @@
 
   .mermaid-viewport {
     position: relative;
-    min-height: 180px;
-    max-height: 50vh;
-    height: 280px;
+    min-height: 220px;
+    max-height: 75vh;
+    height: 420px;
     overflow: hidden;
     cursor: grab;
     touch-action: none;
@@ -529,11 +529,11 @@
     }
 
     @include lg {
-      height: 260px;
+      height: 480px;
     }
 
     @include xl {
-      height: 240px;
+      height: 540px;
     }
 
     &.is-dragging {
