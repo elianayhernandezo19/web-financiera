@@ -42,7 +42,14 @@
       <!-- Derecha: Data Grid -->
       <section class="cmd-panel-right glass-panel" [class.is-fullscreen]="isFullscreen()">
         <header class="cmd-panel-header">
-          <h2 class="cmd-section-title">Data Grid Histórico</h2>
+          <h2 class="cmd-section-title">
+            Data Grid Histórico
+            @if (totalTableData() > 0) {
+              <span class="cmd-section-count">({{ sortedData().length | number }} / {{ totalTableData() | number }})</span>
+            } @else {
+              <span class="cmd-section-count">({{ sortedData().length | number }})</span>
+            }
+          </h2>
           <button class="btn-fullscreen" (click)="toggleFullscreen()" aria-label="Pantalla completa">
             @if (isFullscreen()) {
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

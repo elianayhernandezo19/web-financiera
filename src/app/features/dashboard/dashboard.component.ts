@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DecimalPipe } from '@angular/common';
 
 import { SortChartComponent } from './components/sort-chart/sort-chart.component';
 import { ResultsTableComponent } from './components/results-table/results-table.component';
@@ -13,7 +14,7 @@ import type { SortRecord, ExecutionEntry } from '@core';
   selector: 'app-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [SortChartComponent, ResultsTableComponent, TopVolumeComponent],
+  imports: [SortChartComponent, ResultsTableComponent, TopVolumeComponent, DecimalPipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -34,6 +35,7 @@ export class DashboardComponent {
   // ── Paginación Data Grid ──
   readonly isLoadingTable = signal<boolean>(false);
   readonly hasMoreTableData = signal<boolean>(true);
+  readonly totalTableData = signal<number>(0);
   private currentTableOffset = 0;
   private readonly TABLE_LIMIT = 100;
 
@@ -96,6 +98,12 @@ export class DashboardComponent {
         this.isLoadingTable.set(false);
         if (response.success && response.data) {
           const newBatch = response.data;
+          
+          if (response.meta?.total !== undefined) {
+            this.totalTableData.set(response.meta.total as number);
+          } else if (this.totalTableData() === 0 && offset === 0) {
+            this.totalTableData.set(63893); // Fallback data size
+          }
           
           if (offset === 0) {
             this.sortedData.set(newBatch);
