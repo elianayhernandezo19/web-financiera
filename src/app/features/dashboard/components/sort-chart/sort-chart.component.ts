@@ -22,19 +22,31 @@ export class SortChartComponent {
   private readonly theme = inject(ThemeService);
 
   readonly entries = input.required<ExecutionEntry[]>();
+  readonly isFinished = input<boolean>(false);
 
   /** Deriva el formato ChartData a partir del historial de ejecuciones */
-  readonly chartData = computed<ChartData<'bar'>>(() => ({
-    labels: this.entries().map(e => e.algorithmName),
-    datasets: [{
-      data: this.entries().map(e => e.timeMs),
-      label: 'Tiempo (ms)',
-      backgroundColor: this.entries().map((_, i) => BAR_COLORS[i % BAR_COLORS.length] + 'CC'),
-      borderColor: this.entries().map((_, i) => BAR_COLORS[i % BAR_COLORS.length]),
-      borderWidth: 1.5,
-      borderRadius: 8,
-    }],
-  }));
+  readonly chartData = computed<ChartData<'bar'>>(() => {
+    const finished = this.isFinished();
+    return {
+      labels: this.entries().map((e, index) => {
+        let name = e.algorithmName;
+        if (finished) {
+          if (index === 0) name = '🥇 ' + name;
+          else if (index === 1) name = '🥈 ' + name;
+          else if (index === 2) name = '🥉 ' + name;
+        }
+        return name;
+      }),
+      datasets: [{
+        data: this.entries().map(e => e.timeMs),
+        label: 'Tiempo (ms)',
+        backgroundColor: this.entries().map((_, i) => BAR_COLORS[i % BAR_COLORS.length] + 'CC'),
+        borderColor: this.entries().map((_, i) => BAR_COLORS[i % BAR_COLORS.length]),
+        borderWidth: 1.5,
+        borderRadius: 8,
+      }],
+    };
+  });
 
   /** Opciones reactivas al tema — se recalcula al cambiar isDark() */
   readonly chartOptions = computed<ChartOptions<'bar'>>(() => {
