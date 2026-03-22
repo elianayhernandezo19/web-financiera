@@ -1,0 +1,16 @@
+<div class="top-volume">
+  <div class="top-volume__header">
+    <span class="top-volume__col">FECHA</span>
+    <span class="top-volume__col top-volume__col--right">VOLUMEN (USD)</span>
+  </div>
+
+  <div class="top-volume__list">
+    @for (item of data(); track item.date; let i = $index) {
+      <div class="top-volume__row" [style.animation-delay]="(i * 30) + 'ms'">
+        <div class="top-volume__rank">{{ i + 1 | number:'2.0-0' }}</div>
+        <div class="top-volume__date">{{ item.date | date:'MMM dd, yyyy' }}</div>
+        <div class="top-volume__value">{{ item.volume | number:'1.0-0' }}</div>
+      </div>
+    }
+  </div>
+</div>

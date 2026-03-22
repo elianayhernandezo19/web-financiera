@@ -51,7 +51,8 @@ export class SortChartComponent {
     return {
       responsive: true,
       maintainAspectRatio: false,
-      animation: { duration: 500, easing: 'easeOutQuart' },
+      indexAxis: 'y', // Convertir a gráfico de barras horizontales
+      animation: { duration: 150, easing: 'linear' }, // Animación veloz para simular "carrera"
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -64,20 +65,20 @@ export class SortChartComponent {
           padding: 12,
           titleFont: { size: 11, weight: 'normal' },
           bodyFont: { size: 13, weight: 'bold' },
-          callbacks: { label: ctx => `  ${(ctx.parsed.y ?? 0).toFixed(3)} ms` },
+          callbacks: { label: ctx => `  ${(ctx.parsed.x ?? 0).toFixed(3)} ms` },
         },
       },
       scales: {
         x: {
-          ticks: { color: text, font: { size: 11, weight: 500 } },
-          grid: { color: grid },
-          border: { color: border },
-        },
-        y: {
           ticks: { color: text, font: { size: 11 } },
           grid: { color: grid },
           border: { color: border },
           title: { display: true, text: 'Milisegundos (ms)', color: text, font: { size: 11 } },
+        },
+        y: {
+          ticks: { color: text, font: { size: 11, weight: 600 } },
+          grid: { display: false }, // Ocultar grid lines horizontales para un look más limpio
+          border: { color: border },
         },
       },
     };
