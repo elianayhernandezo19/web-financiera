@@ -534,3 +534,5 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
       viewport.removeEventListener('pointerup', onPointerUp);
       fsBtns.forEach(btn => btn.removeEventListener('click', btnHandler));
     };
+  }
+}
