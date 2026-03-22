@@ -30,6 +30,12 @@ export class DashboardComponent {
   readonly racingExecutionTimes = signal<ExecutionEntry[]>([]);
   readonly sortedData = signal<SortRecord[]>([]);
 
+  // ── Paginación Data Grid ──
+  readonly isLoadingTable = signal<boolean>(false);
+  readonly hasMoreTableData = signal<boolean>(true);
+  private currentTableOffset = 0;
+  private readonly TABLE_LIMIT = 100;
+
   // ── Datos (Mocks Top Volumen) ──
   readonly topVolumeData = signal<{ date: string; volume: number }[]>([
     { date: '2023-11-02', volume: 4521000000 },
@@ -51,6 +57,50 @@ export class DashboardComponent {
 
   constructor() {
     this.initializeEmptyRace();
+    this.loadInitialTableData();
+  }
+
+  // ── Datos Crudos (Paginación / Scroll Infinito) ──
+  private loadInitialTableData(): void {
+    this.currentTableOffset = 0;
+    this.hasMoreTableData.set(true);
+    this.fetchTableData(0);
+  }
+
+  onLoadMoreTableData(): void {
+    if (this.isLoadingTable() || !this.hasMoreTableData()) return;
+    this.fetchTableData(this.currentTableOffset);
+  }
+
+  private fetchTableData(offset: number): void {
+    this.isLoadingTable.set(true);
+    this.api.getDatos(this.TABLE_LIMIT, offset).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (response) => {
+        this.isLoadingTable.set(false);
+        if (response.success && response.data) {
+          const newBatch = response.data;
+          
+          if (offset === 0) {
+            this.sortedData.set(newBatch);
+          } else {
+            this.sortedData.update(prev => [...prev, ...newBatch]);
+          }
+
+          this.currentTableOffset += newBatch.length;
+
+          // Si retorna menos registros de los solicitados, es el final
+          if (newBatch.length < this.TABLE_LIMIT) {
+             this.hasMoreTableData.set(false);
+          }
+        }
+      },
+      error: (err) => {
+        console.error('API Error: No se pudo cargar los registros crudos', err);
+        this.isLoadingTable.set(false);
+      }
+    });
   }
 
   // ── Toggle Pantalla Completa ──
@@ -157,7 +207,6 @@ export class DashboardComponent {
       if (step >= maxSteps) {
         clearInterval(interval);
         this.isRacing.set(false);
-        this.generateMockTableData();
       }
     }, intervalTime);
   }
@@ -169,18 +218,5 @@ export class DashboardComponent {
       timeMs: 0
     }));
     this.racingExecutionTimes.set(emptyEntries);
-    this.sortedData.set([]);
-  }
-
-  private generateMockTableData(): void {
-    const mockData: SortRecord[] = Array.from({ length: 50 }).map((_, i) => ({
-      date: new Date(Date.now() - i * 86400000).toISOString(),
-      open: 150 + Math.random() * 10,
-      high: 160 + Math.random() * 10,
-      low: 140 + Math.random() * 10,
-      close: 155 + Math.random() * 10,
-      volume: 1000000 + Math.random() * 5000000
-    }));
-    this.sortedData.set(mockData);
   }
 }

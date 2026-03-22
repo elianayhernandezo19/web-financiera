@@ -1,13 +1,20 @@
 @if (data().length === 0) {
-  <!-- Estado vacío -->
-  <div class="table-empty">
-    <svg class="table-empty__icon" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" aria-hidden="true">
-      <path stroke-linecap="round" stroke-linejoin="round"
-            d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75z"/>
-    </svg>
-    <p class="table-empty__title">Los datos ordenados aparecerán aquí</p>
-    <p class="table-empty__sub">Ejecuta un algoritmo para ver los registros financieros</p>
-  </div>
+  @if (loadingMore()) {
+    <div class="table-empty">
+      <span class="cmd-pulse" style="margin-bottom: 1rem; width: 12px; height: 12px;"></span>
+      <p class="table-empty__title">Cargando base de datos histórica...</p>
+    </div>
+  } @else {
+    <!-- Estado vacío solo si de verdad falló la carga -->
+    <div class="table-empty">
+      <svg class="table-empty__icon" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75z"/>
+      </svg>
+      <p class="table-empty__title">Bóveda de datos vacía</p>
+      <p class="table-empty__sub">Asegúrate de que la API de Node.js esté funcionando</p>
+    </div>
+  }
 
 } @else {
 
@@ -24,18 +31,25 @@
     </div>
 
     <!-- Filas virtualizadas -->
-    <cdk-virtual-scroll-viewport itemSize="48" class="table-viewport">
+    <cdk-virtual-scroll-viewport itemSize="48" class="table-viewport" (scrolledIndexChange)="onScroll($event)">
       <div
         *cdkVirtualFor="let row of data(); trackBy: trackByDate"
         class="table-row"
       >
-        <span class="table-cell table-cell--date">{{ row.date }}</span>
+        <span class="table-cell table-cell--date">{{ row.date | date:'MMM dd, yyyy' }}</span>
         <span class="table-cell table-cell--number">{{ row.open | number: '1.2-2' }}</span>
         <span class="table-cell table-cell--brand">{{ row.close | number: '1.2-2' }}</span>
         <span class="table-cell table-cell--number">{{ row.high | number: '1.2-2' }}</span>
         <span class="table-cell table-cell--number">{{ row.low | number: '1.2-2' }}</span>
         <span class="table-cell table-cell--volume">{{ row.volume | number: '1.0-0' }}</span>
       </div>
+      
+      @if (loadingMore()) {
+        <div class="table-loading-more">
+          <span class="cmd-pulse"></span>
+          <span class="loading-text">Cargando registros...</span>
+        </div>
+      }
     </cdk-virtual-scroll-viewport>
 
   </div>
