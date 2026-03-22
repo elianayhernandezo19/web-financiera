@@ -14,7 +14,8 @@ export type {
   FinancialAsset,
   SortRequest,
   SortRecord,
-  SortResponse,
+  SortExecutionResult,
+  ApiResponse,
   ExecutionEntry,
 } from './models';
 

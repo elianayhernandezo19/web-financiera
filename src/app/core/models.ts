@@ -16,6 +16,7 @@ export interface AlgorithmInfo {
     readonly worst: string;
     readonly space: string;
   };
+  readonly stable?: boolean;
   readonly description?: string;
 }
 

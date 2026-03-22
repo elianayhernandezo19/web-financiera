@@ -4,7 +4,7 @@
   <div class="algo-card__hero">
     <div class="algo-card__hero-glow" aria-hidden="true"></div>
     <p class="algo-card__hero-label">Complejidad Promedio</p>
-    <code class="algo-card__hero-value">{{ algorithm().averageCase }}</code>
+    <code class="algo-card__hero-value">{{ algorithm().complexity.average }}</code>
   </div>
 
   <!-- Descripción -->
@@ -14,19 +14,19 @@
   <div class="algo-card__grid">
     <div class="algo-card__cell">
       <p class="algo-card__cell-label">Mejor caso</p>
-      <code class="algo-card__cell-value algo-card__cell-value--best">{{ algorithm().bestCase }}</code>
+      <code class="algo-card__cell-value algo-card__cell-value--best">{{ algorithm().complexity.best }}</code>
     </div>
     <div class="algo-card__cell">
       <p class="algo-card__cell-label">Promedio</p>
-      <code class="algo-card__cell-value algo-card__cell-value--average">{{ algorithm().averageCase }}</code>
+      <code class="algo-card__cell-value algo-card__cell-value--average">{{ algorithm().complexity.average }}</code>
     </div>
     <div class="algo-card__cell">
       <p class="algo-card__cell-label">Peor caso</p>
-      <code class="algo-card__cell-value algo-card__cell-value--worst">{{ algorithm().worstCase }}</code>
+      <code class="algo-card__cell-value algo-card__cell-value--worst">{{ algorithm().complexity.worst }}</code>
     </div>
     <div class="algo-card__cell">
       <p class="algo-card__cell-label">Espacio</p>
-      <code class="algo-card__cell-value algo-card__cell-value--space">{{ algorithm().spaceComplexity }}</code>
+      <code class="algo-card__cell-value algo-card__cell-value--space">{{ algorithm().complexity.space }}</code>
     </div>
   </div>
 

@@ -20,7 +20,7 @@ export class ApiService {
 
   // La URL base puede moverse a src/environments/ para diferenciar
   // entornos de dev/productoin sin cambiar el código del servicio.
-  private readonly BASE_URL = 'http://localhost:3000/api';
+  private readonly BASE_URL = 'http://localhost:3000/api/v1';
 
   /**
    * Ejecuta un algoritmo de ordenamiento sobre los datos financieros del backend.
