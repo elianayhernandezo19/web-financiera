@@ -42,12 +42,21 @@
 
       <!-- Acciones de Navegación y Toggle -->
       <div class="navbar__right">
-        <a routerLink="/algorithms" class="nav-btn" aria-label="Ver todos los algoritmos">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-          </svg>
-          <span class="nav-btn__text">Ver Algoritmos</span>
-        </a>
+        @if (isAlgorithmsRoute()) {
+          <a routerLink="/" class="nav-btn" aria-label="Ir al Dashboard">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            <span class="nav-btn__text">Dashboard</span>
+          </a>
+        } @else {
+          <a routerLink="/algorithms" class="nav-btn" aria-label="Ver todos los algoritmos">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+            <span class="nav-btn__text">Ver Algoritmos</span>
+          </a>
+        }
         <span class="theme-label">
           {{ theme.isDark() ? 'Dark' : 'Light' }}
         </span>
