@@ -11,6 +11,7 @@ import {
   HostListener,
 } from '@angular/core';
 import { DecimalPipe, DatePipe, NgClass } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { ALGORITHMS, AlgorithmMockService, ApiService } from '@core';
 import type { SortRecord, AlgorithmInfo } from '@core';
@@ -52,6 +53,7 @@ mermaid.initialize({
 export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
   private readonly mockService = inject(AlgorithmMockService);
   private readonly apiService = inject(ApiService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   @ViewChild('docsContainer') docsContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('fsViewport') fsViewport?: ElementRef<HTMLDivElement>;
@@ -81,7 +83,8 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
   readonly highlightedCode = signal<string>('');
 
   // ── Fullscreen Diagram ──
-  readonly fullscreenSvg = signal<string | null>(null);
+  readonly fullscreenSvg = signal<SafeHtml | null>(null);
+  private fullscreenRawSvg: string | null = null;
 
   // ── Mermaid rendering tracking ──
   private needsMermaidRender = false;
@@ -193,7 +196,8 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
   }
 
   openFullscreen(svgHtml: string): void {
-    this.fullscreenSvg.set(svgHtml);
+    this.fullscreenRawSvg = svgHtml;
+    this.fullscreenSvg.set(this.sanitizer.bypassSecurityTrustHtml(svgHtml));
     this.fsEventsAttached = false;
     this.fsCleanup?.();
     this.fsCleanup = null;
@@ -201,6 +205,7 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
 
   closeFullscreen(): void {
     this.fullscreenSvg.set(null);
+    this.fullscreenRawSvg = null;
     this.fsEventsAttached = false;
     this.fsCleanup?.();
     this.fsCleanup = null;
@@ -253,8 +258,8 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
 
       let graphDefinition = codeEl.textContent ?? '';
       graphDefinition = graphDefinition.replace(/\r/g, '');
-      // Replace literal \n with <br/> for Mermaid line breaks (requires securityLevel: 'loose')
-      graphDefinition = graphDefinition.replace(/\\n/g, '<br/>');
+      // Replace literal \n with <br> for Mermaid multi-line node labels
+      graphDefinition = graphDefinition.replace(/\\n/g, '<br>');
 
       const uniqueHash = Math.random().toString(36).substring(2, 9);
       const id = `mermaid-${this.selectedAlgorithmId()}-${i}-${uniqueHash}`;
@@ -427,15 +432,27 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
       btn.addEventListener('click', (e: Event) => {
         e.stopPropagation();
         const action = (btn as HTMLElement).dataset['action'];
+        const cx = viewport.clientWidth / 2;
+        const cy = viewport.clientHeight / 2;
         switch (action) {
-          case 'zoom-in':
+          case 'zoom-in': {
+            const oldZoom = zoom;
             zoom = Math.min(5, zoom * 1.3);
+            const r = zoom / oldZoom;
+            panX = cx - r * (cx - panX);
+            panY = cy - r * (cy - panY);
             applyTransform();
             break;
-          case 'zoom-out':
+          }
+          case 'zoom-out': {
+            const oldZoom = zoom;
             zoom = Math.max(0.05, zoom * 0.7);
+            const r = zoom / oldZoom;
+            panX = cx - r * (cx - panX);
+            panY = cy - r * (cy - panY);
             applyTransform();
             break;
+          }
           case 'fit':
             autoFit();
             break;
@@ -468,22 +485,41 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
       if (zoomLabel) zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
     };
 
-    // Auto-fit for fullscreen
-    requestAnimationFrame(() => {
+    const autoFitFs = () => {
       const svgEl = content.querySelector('svg');
-      if (!svgEl || viewport.offsetWidth === 0) return;
-      const svgW = parseFloat(svgEl.getAttribute('width') || '0') || svgEl.getBoundingClientRect().width;
-      const svgH = parseFloat(svgEl.getAttribute('height') || '0') || svgEl.getBoundingClientRect().height;
-      const vpW = viewport.clientWidth - 64;
-      const vpH = viewport.clientHeight - 64;
-      if (svgW > vpW || svgH > vpH) {
-        zoom = Math.min(vpW / svgW, vpH / svgH);
-        zoom = Math.max(0.05, zoom);
-      }
-      panX = 0;
-      panY = 0;
+      if (!svgEl) return;
+      const vpW = viewport.clientWidth;
+      const vpH = viewport.clientHeight;
+      if (vpW === 0 || vpH === 0) return;
+
+      const svgW = svgEl.viewBox?.baseVal?.width || parseFloat(svgEl.getAttribute('width') || '0') || svgEl.scrollWidth;
+      const svgH = svgEl.viewBox?.baseVal?.height || parseFloat(svgEl.getAttribute('height') || '0') || svgEl.scrollHeight;
+      if (svgW === 0 || svgH === 0) return;
+
+      const pad = 48;
+      const fitW = (vpW - pad) / svgW;
+      const fitH = (vpH - pad) / svgH;
+      zoom = Math.min(fitW, fitH, 1.5);
+      zoom = Math.max(0.05, zoom);
+
+      const scaledW = svgW * zoom;
+      const scaledH = svgH * zoom;
+      panX = (vpW - scaledW) / 2;
+      panY = (vpH - scaledH) / 2;
       applyTransform();
-    });
+    };
+
+    // Auto-fit with retry
+    const tryFit = (retries = 4) => {
+      requestAnimationFrame(() => {
+        if (viewport.clientWidth > 0 && content.querySelector('svg')) {
+          autoFitFs();
+        } else if (retries > 0) {
+          setTimeout(() => tryFit(retries - 1), 60);
+        }
+      });
+    };
+    tryFit();
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
@@ -531,18 +567,29 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
     const fsContainer = viewport.closest('.fs-container');
     const btnHandler = (e: Event) => {
       const action = (e.currentTarget as HTMLElement).dataset['fsAction'];
+      const cx = viewport.clientWidth / 2;
+      const cy = viewport.clientHeight / 2;
       switch (action) {
-        case 'zoom-in':
+        case 'zoom-in': {
+          const oldZ = zoom;
           zoom = Math.min(5, zoom * 1.3);
+          const r = zoom / oldZ;
+          panX = cx - r * (cx - panX);
+          panY = cy - r * (cy - panY);
           applyTransform();
           break;
-        case 'zoom-out':
+        }
+        case 'zoom-out': {
+          const oldZ = zoom;
           zoom = Math.max(0.05, zoom * 0.7);
+          const r = zoom / oldZ;
+          panX = cx - r * (cx - panX);
+          panY = cy - r * (cy - panY);
           applyTransform();
           break;
+        }
         case 'fit':
-          zoom = 1; panX = 0; panY = 0;
-          applyTransform();
+          autoFitFs();
           break;
       }
     };
