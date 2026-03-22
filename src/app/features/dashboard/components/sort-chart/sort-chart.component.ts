@@ -64,7 +64,7 @@ export class SortChartComponent {
       responsive: true,
       maintainAspectRatio: false,
       indexAxis: 'y', // Convertir a gráfico de barras horizontales
-      animation: { duration: 150, easing: 'linear' }, // Animación veloz para simular "carrera"
+      animation: false as any, // Deshabilitar animación interna para permitir inyección granular a 60 FPS
       plugins: {
         legend: { display: false },
         tooltip: {
