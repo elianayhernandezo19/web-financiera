@@ -17,6 +17,14 @@ export const routes: Routes = [
       ),
     title: 'Dashboard — Análisis de Algoritmos · UQ',
   },
+  {
+    path: 'algorithms',
+    loadComponent: () =>
+      import('./features/algorithm-explorer/algorithm-explorer.component').then(
+        (m) => m.AlgorithmExplorerComponent,
+      ),
+    title: 'Explorador de Algoritmos — Análisis de Algoritmos · UQ',
+  },
   // Catch-all: redirige rutas desconocidas al dashboard
   { path: '**', redirectTo: 'dashboard' },
 ];

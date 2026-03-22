@@ -1,0 +1,839 @@
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
+
+// ═══════════════════════════════════════════════════════════════
+// Algorithm Explorer — Split View Dark Mode Professional Design
+// ═══════════════════════════════════════════════════════════════
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.algo-explorer {
+  flex: 1;
+  position: relative;
+  background-color: $gray-50;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+  color: $gray-900;
+  padding: 1rem 1.5rem;
+  font-family: $font-sans;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  :host-context(.dark) & {
+    background-color: $gray-950;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    color: $text-primary;
+  }
+
+  @include md {
+    padding: 1rem 2rem;
+  }
+}
+
+.algo-container {
+  flex: 1;
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-height: 0;
+}
+
+// ══════════════════════════════════════
+// TOP BAR
+// ══════════════════════════════════════
+.algo-topbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.algo-topbar__left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.algo-topbar__info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.algo-select-label {
+  font-family: $font-mono;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: $gray-500;
+
+  :host-context(.dark) & {
+    color: $gray-400;
+  }
+}
+
+.algo-select-wrapper {
+  position: relative;
+}
+
+.algo-select {
+  @include styled-select;
+  min-width: 240px;
+  padding-right: 2.5rem;
+}
+
+.algo-select-chevron {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: $gray-400;
+  pointer-events: none;
+}
+
+.algo-badge-stable {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: $radius-full;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+
+  &.is-stable {
+    background: rgba($brand-500, 0.1);
+    color: $brand-600;
+    border: 1px solid rgba($brand-500, 0.3);
+
+    :host-context(.dark) & {
+      color: $brand-400;
+    }
+  }
+
+  &.is-unstable {
+    background: rgba($amber-500, 0.1);
+    color: $amber-500;
+    border: 1px solid rgba($amber-500, 0.3);
+  }
+}
+
+// ══════════════════════════════════════
+// SPLIT VIEW
+// ══════════════════════════════════════
+.algo-split {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  min-height: 0;
+
+  @include lg {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+// ── Left Column ──
+.algo-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+}
+
+// ── Tab Toggle ──
+.algo-tabs {
+  display: flex;
+  gap: 2px;
+  border-radius: $radius-lg $radius-lg 0 0;
+  overflow: hidden;
+}
+
+.algo-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  font-size: $text-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: none;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  // LIGHT MODE default
+  background: $gray-100;
+  color: $gray-500;
+
+  :host-context(.dark) & {
+    background: rgba(255, 255, 255, 0.04);
+    color: $gray-400;
+  }
+
+  &:hover:not(.is-active) {
+    background: $gray-200;
+    color: $gray-700;
+
+    :host-context(.dark) & {
+      background: rgba(255, 255, 255, 0.06);
+      color: $gray-300;
+    }
+  }
+
+  &.is-active {
+    background: rgba(255, 255, 255, 0.9);
+    color: $brand-600;
+    box-shadow: 0 -2px 0 0 $brand-500 inset;
+
+    :host-context(.dark) & {
+      background: rgba(255, 255, 255, 0.08);
+      color: $brand-400;
+      box-shadow: 0 -2px 0 0 $brand-500 inset;
+    }
+  }
+}
+
+// ── Panel Base ──
+.algo-panel {
+  flex: 1;
+  min-height: 300px;
+  max-height: 65vh;
+  overflow-y: auto;
+  border-radius: 0 0 $radius-lg $radius-lg;
+  padding: 1.5rem;
+
+  // LIGHT MODE
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: none;
+
+  :host-context(.dark) & {
+    background: rgba(15, 23, 42, 0.75);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  // Custom scrollbar
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+
+    :host-context(.dark) & {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+}
+
+// ══════════════════════════════════════
+// DOCS PANEL (Markdown Rendering)
+// ══════════════════════════════════════
+.algo-docs {
+  font-size: $text-sm;
+  line-height: 1.7;
+
+  h1 {
+    font-size: $text-xl;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: $gray-900;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 0.75rem;
+
+    :host-context(.dark) & {
+      color: $text-primary;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  h2 {
+    font-size: $text-base;
+    font-weight: 700;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: $brand-700;
+
+    :host-context(.dark) & {
+      color: $brand-400;
+    }
+  }
+
+  h3 {
+    font-size: $text-sm;
+    font-weight: 600;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    margin-bottom: 0.75rem;
+    color: $gray-700;
+
+    :host-context(.dark) & {
+      color: $gray-300;
+    }
+  }
+
+  strong {
+    font-weight: 700;
+    color: $gray-800;
+
+    :host-context(.dark) & {
+      color: $gray-100;
+    }
+  }
+
+  code {
+    font-family: $font-mono;
+    font-size: 0.85em;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.06);
+    color: $brand-700;
+
+    :host-context(.dark) & {
+      background: rgba(255, 255, 255, 0.1);
+      color: $brand-300;
+    }
+  }
+
+  ul, ol {
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+
+    li {
+      margin-bottom: 0.35rem;
+      color: $gray-700;
+
+      :host-context(.dark) & {
+        color: $gray-300;
+      }
+    }
+  }
+
+  // Tables in markdown
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    font-size: $text-xs;
+
+    th {
+      text-align: left;
+      padding: 0.4rem 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: $gray-500;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+      :host-context(.dark) & {
+        color: $gray-400;
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    td {
+      padding: 0.35rem 0.75rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+      :host-context(.dark) & {
+        border-color: rgba(255, 255, 255, 0.05);
+      }
+    }
+
+    tr:nth-child(even) {
+      background: rgba(0, 0, 0, 0.02);
+
+      :host-context(.dark) & {
+        background: rgba(255, 255, 255, 0.02);
+      }
+    }
+  }
+
+  // Mermaid diagrams
+  .mermaid-diagram {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+    margin: 1rem 0;
+    border-radius: $radius-lg;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+
+    :host-context(.dark) & {
+      background: rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+}
+
+// ══════════════════════════════════════
+// CODE PANEL (VS Code Style)
+// ══════════════════════════════════════
+.algo-code-panel {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.algo-code-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: $gray-100;
+
+  :host-context(.dark) & {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+}
+
+.algo-code-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+
+  &--red { background: #ff5f57; }
+  &--yellow { background: #febc2e; }
+  &--green { background: #28c840; }
+}
+
+.algo-code-filename {
+  margin-left: 0.5rem;
+  font-family: $font-mono;
+  font-size: 11px;
+  color: $gray-500;
+
+  :host-context(.dark) & {
+    color: $gray-400;
+  }
+}
+
+.algo-code-block {
+  padding: 1.25rem;
+  margin: 0;
+  overflow-x: auto;
+  font-family: $font-mono;
+  font-size: 12px;
+  line-height: 1.65;
+  background: $gray-50;
+  color: $gray-800;
+  min-height: 250px;
+
+  :host-context(.dark) & {
+    background: rgba(2, 6, 23, 0.9);
+    color: $gray-200;
+  }
+
+  code {
+    font-family: inherit;
+    font-size: inherit;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  // Highlight.js token colors (dark mode)
+  :host-context(.dark) & {
+    .hljs-keyword { color: #c678dd; }
+    .hljs-string { color: #98c379; }
+    .hljs-number { color: #d19a66; }
+    .hljs-comment { color: #5c6370; font-style: italic; }
+    .hljs-function { color: #61afef; }
+    .hljs-title { color: #61afef; }
+    .hljs-params { color: #e06c75; }
+    .hljs-type { color: #e5c07b; }
+    .hljs-built_in { color: #e5c07b; }
+    .hljs-variable { color: #e06c75; }
+    .hljs-attr { color: #d19a66; }
+    .hljs-operator { color: #56b6c2; }
+    .hljs-punctuation { color: #abb2bf; }
+  }
+
+  // Highlight.js token colors (light mode)
+  .hljs-keyword { color: #7c3aed; }
+  .hljs-string { color: #059669; }
+  .hljs-number { color: #d97706; }
+  .hljs-comment { color: #94a3b8; font-style: italic; }
+  .hljs-function { color: #2563eb; }
+  .hljs-title { color: #2563eb; }
+  .hljs-params { color: #dc2626; }
+  .hljs-type { color: #b45309; }
+  .hljs-built_in { color: #b45309; }
+  .hljs-variable { color: #dc2626; }
+  .hljs-attr { color: #d97706; }
+  .hljs-operator { color: #0891b2; }
+  .hljs-punctuation { color: #475569; }
+}
+
+// ══════════════════════════════════════
+// RIGHT COLUMN
+// ══════════════════════════════════════
+.algo-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+}
+
+// ── Execute Button ──
+.algo-execute-btn {
+  @include btn-primary;
+  width: 100%;
+  padding: 1rem 2rem;
+  font-size: $text-base;
+  gap: 0.75rem;
+}
+
+.algo-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Metric Cards ──
+.algo-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.algo-metric-card {
+  @include glass-card;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+
+  &:hover {
+    transform: none;
+  }
+}
+
+.algo-metric-label {
+  font-family: $font-mono;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: $gray-500;
+
+  :host-context(.dark) & {
+    color: $gray-400;
+  }
+}
+
+.algo-metric-value {
+  font-family: $font-mono;
+  font-size: $text-xl;
+  font-weight: 700;
+  color: $brand-600;
+
+  :host-context(.dark) & {
+    color: $brand-400;
+    @include glow-text($brand-500);
+  }
+
+  small {
+    font-size: $text-xs;
+    font-weight: 500;
+    opacity: 0.7;
+  }
+}
+
+.algo-metric-placeholder {
+  color: $gray-400;
+  font-weight: 500;
+
+  :host-context(.dark) & {
+    color: $gray-600;
+  }
+}
+
+// ══════════════════════════════════════
+// RESULTS PANEL
+// ══════════════════════════════════════
+.algo-results-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  // LIGHT MODE
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: $radius-xl;
+  padding: 1rem;
+
+  :host-context(.dark) & {
+    background: rgba(15, 23, 42, 0.75);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.algo-results-title {
+  font-family: $font-mono;
+  font-size: $text-xs;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: $gray-600;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  :host-context(.dark) & {
+    color: $gray-400;
+  }
+
+  &::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    background: $brand-500;
+    border-radius: 50%;
+    box-shadow: 0 0 8px $brand-500;
+  }
+}
+
+.algo-results-count {
+  font-weight: 500;
+  opacity: 0.7;
+  margin-left: auto;
+}
+
+.algo-results-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 200px;
+  color: $gray-400;
+
+  :host-context(.dark) & {
+    color: $gray-600;
+  }
+
+  p {
+    font-size: $text-sm;
+    font-weight: 500;
+  }
+}
+
+// ── Table ──
+.algo-table-wrap {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+
+    :host-context(.dark) & {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+.algo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+
+  th {
+    text-align: left;
+    padding: 0.3rem 0.5rem;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $gray-500;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 10;
+
+    :host-context(.dark) & {
+      color: $gray-400;
+      border-color: rgba(255, 255, 255, 0.1);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    &.accent {
+      color: $brand-600;
+      :host-context(.dark) & { color: $brand-400; }
+    }
+  }
+
+  td {
+    padding: 0.25rem 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+    :host-context(.dark) & {
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  .text-right {
+    text-align: right;
+  }
+
+  .cell-date {
+    font-family: $font-mono;
+    font-size: 10px;
+    color: $gray-500;
+    :host-context(.dark) & { color: $gray-400; }
+  }
+
+  .cell-number {
+    font-variant-numeric: tabular-nums;
+    color: $gray-600;
+    :host-context(.dark) & { color: $gray-300; }
+  }
+
+  .cell-brand {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: $brand-600;
+    :host-context(.dark) & { color: $brand-400; }
+  }
+
+  .cell-volume {
+    font-variant-numeric: tabular-nums;
+    font-size: 10px;
+    color: $gray-400;
+    :host-context(.dark) & { color: $gray-500; }
+  }
+
+  tbody tr {
+    transition: background-color 75ms ease;
+
+    &:nth-child(even) {
+      background-color: rgba(0, 0, 0, 0.03);
+
+      :host-context(.dark) & {
+        background-color: rgba(255, 255, 255, 0.03);
+      }
+    }
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05) !important;
+
+      :host-context(.dark) & {
+        background-color: rgba(255, 255, 255, 0.04) !important;
+      }
+    }
+  }
+}
+
+// ── Paginator ──
+.algo-paginator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0 0;
+  gap: 0.5rem;
+}
+
+.algo-page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: $radius-md;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: transparent;
+  color: $gray-600;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  :host-context(.dark) & {
+    color: $gray-400;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.04);
+    color: $brand-600;
+    border-color: rgba($brand-500, 0.3);
+
+    :host-context(.dark) & {
+      background: rgba(255, 255, 255, 0.04);
+      color: $brand-400;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.algo-page-info {
+  font-family: $font-mono;
+  font-size: 11px;
+  color: $gray-500;
+
+  :host-context(.dark) & {
+    color: $gray-400;
+  }
+}
+
+// ══════════════════════════════════════
+// ANIMATIONS
+// ══════════════════════════════════════
+.animate-panel {
+  animation: panel-fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes panel-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
