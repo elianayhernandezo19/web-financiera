@@ -29,7 +29,7 @@ mermaid.initialize({
   startOnLoad: false,
   theme: 'dark',
   securityLevel: 'loose',
-  flowchart: { curve: 'basis', padding: 16 },
+  flowchart: { curve: 'basis', padding: 12, nodeSpacing: 30, rankSpacing: 40 },
   themeVariables: {
     primaryColor: '#10b981',
     primaryTextColor: '#f8fafc',
@@ -37,7 +37,7 @@ mermaid.initialize({
     lineColor: '#64748b',
     secondaryColor: '#1e293b',
     tertiaryColor: '#0f172a',
-    fontSize: '13px',
+    fontSize: '12px',
   },
 });
 
@@ -253,7 +253,8 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
 
       let graphDefinition = codeEl.textContent ?? '';
       graphDefinition = graphDefinition.replace(/\r/g, '');
-      graphDefinition = graphDefinition.replace(/\\n/g, '<br/>');
+      // Convert literal \n sequences to actual newlines for Mermaid line breaks
+      graphDefinition = graphDefinition.replace(/\\n/g, '\n');
 
       const uniqueHash = Math.random().toString(36).substring(2, 9);
       const id = `mermaid-${this.selectedAlgorithmId()}-${i}-${uniqueHash}`;
