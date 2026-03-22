@@ -4,7 +4,6 @@
 .dashboard-cmd {
   flex: 1;
   position: relative;
-  overflow: hidden;
   
   // DEFAULT LIGHT MODE
   background-color: $gray-50;
@@ -36,8 +35,8 @@
   margin: 0 auto;
   display: grid;
   gap: 1.5rem;
-  // LIMIT HORIZONTAL CHART HEIGHT STRICTLY
-  grid-template-rows: minmax(30%, 35%) 1fr;
+// LIMIT HORIZONTAL CHART HEIGHT STRICTLY
+  grid-template-rows: minmax(320px, auto) minmax(450px, 1fr);
   grid-template-columns: 1fr;
   grid-template-areas:
     "race-track"

@@ -5,6 +5,11 @@
 // Results Table — tabla de datos financieros con virtual scroll
 // ═══════════════════════════════════════════════════════════════
 
+:host {
+  display: block;
+  height: 100%;
+}
+
 // ── Estado vacío ──
 .table-empty {
   display: flex;
@@ -39,6 +44,9 @@
   border-radius: $radius-xl;
   overflow: hidden;
   border: 1px solid $gray-100;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 
   :host-context(.dark) & { border-color: rgba(255, 255, 255, 0.05); }
 }
@@ -79,7 +87,8 @@
 
 // ── Virtual scroll viewport ──
 .table-viewport {
-  height: 20rem;
+  flex: 1;
+  min-height: 20rem;
 }
 
 // ── Row ──

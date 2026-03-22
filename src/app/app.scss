@@ -6,8 +6,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 .app-shell {
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   transition: background-color $transition-smooth, color $transition-smooth;
