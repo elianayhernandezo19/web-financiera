@@ -1,59 +1,43 @@
 @if (data().length === 0) {
-  <!-- Estado vacío: sin datos todavía -->
-  <div class="flex flex-col items-center justify-center h-36 gap-3 text-gray-400 dark:text-gray-600">
-    <svg class="h-10 w-10 opacity-40" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" aria-hidden="true">
+  <!-- Estado vacío -->
+  <div class="table-empty">
+    <svg class="table-empty__icon" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round"
             d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75z"/>
     </svg>
-    <p class="text-sm font-medium">Los datos ordenados aparecerán aquí</p>
-    <p class="text-xs opacity-60">Ejecuta un algoritmo para ver los registros financieros</p>
+    <p class="table-empty__title">Los datos ordenados aparecerán aquí</p>
+    <p class="table-empty__sub">Ejecuta un algoritmo para ver los registros financieros</p>
   </div>
 
 } @else {
 
-  <!--
-    Tabla de datos estilo trading terminal.
-    La cabecera es "sticky" dentro del contenedor con overflow.
-    CdkVirtualScrollViewport renderiza solo las ~7 filas visibles de las potencialmente
-    miles de registros, manteniendo el DOM ligero y el scroll a 60 fps.
-  -->
-  <div class="rounded-xl overflow-hidden border border-gray-100 dark:border-white/[0.05]">
+  <div class="table-wrap">
 
-    <!-- ── Cabecera fija (sticky) ── -->
-    <div
-      class="grid grid-cols-6 gap-2 px-4 py-2.5
-             bg-gray-50 dark:bg-slate-900/80
-             border-b border-gray-100 dark:border-white/[0.05]
-             text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]
-             sticky top-0 z-10"
-    >
+    <!-- Header fijo -->
+    <div class="table-header">
       <span>Fecha</span>
-      <span class="text-right">Apertura</span>
-      <span class="text-right text-emerald-600 dark:text-emerald-400">Cierre</span>
-      <span class="text-right">Máximo</span>
-      <span class="text-right">Mínimo</span>
-      <span class="text-right">Volumen</span>
+      <span class="table-header__cell table-header__cell--right">Apertura</span>
+      <span class="table-header__cell table-header__cell--brand">Cierre</span>
+      <span class="table-header__cell table-header__cell--right">Máximo</span>
+      <span class="table-header__cell table-header__cell--right">Mínimo</span>
+      <span class="table-header__cell table-header__cell--right">Volumen</span>
     </div>
 
-    <!-- ── Filas virtualizadas ── -->
-    <cdk-virtual-scroll-viewport itemSize="48" class="h-80">
+    <!-- Filas virtualizadas -->
+    <cdk-virtual-scroll-viewport itemSize="48" class="table-viewport">
       <div
         *cdkVirtualFor="let row of data(); trackBy: trackByDate"
-        class="grid grid-cols-6 gap-2 px-4 items-center h-12
-               border-b border-gray-50 dark:border-white/[0.03]
-               hover:bg-emerald-50/50 dark:hover:bg-emerald-500/[0.035]
-               transition-colors duration-75 group"
+        class="table-row"
       >
-        <span class="font-mono text-[11px] text-gray-400 dark:text-gray-500 truncate">{{ row.date }}</span>
-        <span class="text-right tabular-nums text-sm text-gray-600 dark:text-gray-300">{{ row.openPrice | number: '1.2-2' }}</span>
-        <span class="text-right text-emerald-600 dark:text-emerald-400 font-semibold tabular-nums text-sm">{{ row.closePrice | number: '1.2-2' }}</span>
-        <span class="text-right tabular-nums text-sm text-gray-600 dark:text-gray-300">{{ row.highPrice | number: '1.2-2' }}</span>
-        <span class="text-right tabular-nums text-sm text-gray-600 dark:text-gray-300">{{ row.lowPrice | number: '1.2-2' }}</span>
-        <span class="text-right tabular-nums text-xs text-gray-400 dark:text-gray-500">{{ row.volume | number: '1.0-0' }}</span>
+        <span class="table-cell table-cell--date">{{ row.date }}</span>
+        <span class="table-cell table-cell--number">{{ row.openPrice | number: '1.2-2' }}</span>
+        <span class="table-cell table-cell--brand">{{ row.closePrice | number: '1.2-2' }}</span>
+        <span class="table-cell table-cell--number">{{ row.highPrice | number: '1.2-2' }}</span>
+        <span class="table-cell table-cell--number">{{ row.lowPrice | number: '1.2-2' }}</span>
+        <span class="table-cell table-cell--volume">{{ row.volume | number: '1.0-0' }}</span>
       </div>
     </cdk-virtual-scroll-viewport>
 
   </div>
 
 }
-

@@ -19,6 +19,7 @@ import { SortRecord } from '../../../../core/models/sort-result.model';
   // ScrollingModule exporta CdkVirtualScrollViewport y CdkVirtualForOf
   imports: [ScrollingModule, DecimalPipe],
   templateUrl: './results-table.component.html',
+  styleUrl: './results-table.component.scss',
 })
 export class ResultsTableComponent {
   readonly data = input.required<SortRecord[]>();
