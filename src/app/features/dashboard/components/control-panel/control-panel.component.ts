@@ -1,17 +1,13 @@
 import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AlgorithmInfo } from '../../../../core/models/algorithm.model';
+import { FinancialAsset } from '../../../../core/models/asset.model';
 
 /**
  * ControlPanelComponent — componente presentacional ("dumb component").
  *
- * No contiene lógica de negocio ni estado propio. Recibe datos vía
- * signal inputs (input()) y comunica acciones al padre con outputs.
- *
- * Por qué input() en vez de @Input():
- *   - El valor es un Signal: se puede componer con computed() y effect()
- *   - Sin necesidad de ngOnChanges para reaccionar a cambios
- *   - Infraestructura de reactividad consistent con el resto de la app
+ * Contiene los selectores de activo financiero y algoritmo de ordenamiento,
+ * más el botón de ejecución con estado de carga.
  */
 @Component({
   selector: 'app-control-panel',
@@ -19,18 +15,26 @@ import { AlgorithmInfo } from '../../../../core/models/algorithm.model';
   templateUrl: './control-panel.component.html',
 })
 export class ControlPanelComponent {
-  // input.required<T>() — su ausencia causa error en tiempo de compilación
+  // ── Inputs ──
   readonly algorithms = input.required<AlgorithmInfo[]>();
-  readonly selectedId = input.required<string>();
+  readonly selectedAlgorithmId = input.required<string>();
+  readonly assets = input.required<FinancialAsset[]>();
+  readonly selectedAssetId = input.required<string>();
   readonly isLoading = input<boolean>(false);
 
-  // output() reemplaza EventEmitter con una API más limpia y tipada
+  // ── Outputs ──
   readonly algorithmSelected = output<string>();
+  readonly assetSelected = output<string>();
   readonly executeSortClicked = output<void>();
 
-  onSelectChange(event: Event): void {
+  onAlgorithmChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     this.algorithmSelected.emit(value);
+  }
+
+  onAssetChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.assetSelected.emit(value);
   }
 
   onExecute(): void {
