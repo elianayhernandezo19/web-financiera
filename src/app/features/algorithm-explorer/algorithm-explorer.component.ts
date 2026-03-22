@@ -339,22 +339,48 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
 
     const autoFit = () => {
       const svgEl = content.querySelector('svg');
-      if (!svgEl || viewport.offsetWidth === 0) return;
-      const svgW = parseFloat(svgEl.getAttribute('width') || '0') || svgEl.getBoundingClientRect().width;
-      const svgH = parseFloat(svgEl.getAttribute('height') || '0') || svgEl.getBoundingClientRect().height;
-      const vpW = viewport.clientWidth - 32;
-      const vpH = viewport.clientHeight - 32;
-      if (svgW > vpW || svgH > vpH) {
-        zoom = Math.min(vpW / svgW, vpH / svgH);
-        zoom = Math.max(0.05, Math.min(1, zoom));
-      }
-      panX = 0;
-      panY = 0;
+      if (!svgEl) return;
+      const vpW = viewport.clientWidth;
+      const vpH = viewport.clientHeight;
+      if (vpW === 0 || vpH === 0) return;
+
+      // Remove any fixed width/height on SVG so it reports intrinsic size
+      const svgW = svgEl.viewBox?.baseVal?.width || parseFloat(svgEl.getAttribute('width') || '0') || svgEl.scrollWidth;
+      const svgH = svgEl.viewBox?.baseVal?.height || parseFloat(svgEl.getAttribute('height') || '0') || svgEl.scrollHeight;
+      if (svgW === 0 || svgH === 0) return;
+
+      const pad = 24;
+      const fitW = (vpW - pad) / svgW;
+      const fitH = (vpH - pad) / svgH;
+      zoom = Math.min(fitW, fitH, 1); // never exceed 100%
+      zoom = Math.max(0.05, zoom);
+
+      // Center the diagram
+      const scaledW = svgW * zoom;
+      const scaledH = svgH * zoom;
+      panX = Math.max(0, (vpW - scaledW) / 2);
+      panY = Math.max(0, (vpH - scaledH) / 2);
+
       applyTransform();
     };
 
-    // Auto-fit on first render
-    requestAnimationFrame(autoFit);
+    // Auto-fit with retry (viewport may not be laid out immediately)
+    const tryAutoFit = (retries = 3) => {
+      requestAnimationFrame(() => {
+        if (viewport.clientWidth > 0) {
+          autoFit();
+        } else if (retries > 0) {
+          setTimeout(() => tryAutoFit(retries - 1), 50);
+        }
+      });
+    };
+    tryAutoFit();
+
+    // Re-fit when the container resizes (e.g. panel expand/collapse)
+    const ro = new ResizeObserver(() => {
+      autoFit();
+    });
+    ro.observe(viewport);
 
     // Wheel zoom (centered on pointer)
     viewport.addEventListener('wheel', (e: WheelEvent) => {
@@ -410,11 +436,7 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
             applyTransform();
             break;
           case 'fit':
-            zoom = 1;
-            panX = 0;
-            panY = 0;
-            applyTransform();
-            requestAnimationFrame(autoFit);
+            autoFit();
             break;
           case 'fullscreen':
             this.openFullscreen(content.innerHTML);
