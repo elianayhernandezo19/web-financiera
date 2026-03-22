@@ -14,9 +14,10 @@
   }
 
   &__header {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0.5rem 0.75rem 2.5rem;
+    display: grid;
+    grid-template-columns: 2rem 5rem 1fr auto;
+    gap: 0.5rem;
+    padding: 0.5rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1); // LIGHT MODE
     color: $gray-500; // LIGHT MODE
     font-size: 10px;
@@ -53,7 +54,9 @@
   }
 
   &__row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 2rem 5rem 1fr auto;
+    gap: 0.5rem;
     align-items: center;
     padding: 0.5rem;
     border-radius: $radius-md;
@@ -66,15 +69,19 @@
   }
 
   &__rank {
-    width: 2rem;
     color: $brand-500;
     font-weight: 700;
     font-size: $text-xs;
     opacity: 0.8;
   }
 
+  &__symbol {
+    font-weight: 700;
+    color: $gray-700;
+    :host-context(.dark) & { color: $gray-300; }
+  }
+
   &__date {
-    flex: 1;
     color: $gray-500; // LIGHT MODE
     :host-context(.dark) & {
       color: $gray-200;
