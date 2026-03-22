@@ -5,8 +5,10 @@ import {
   signal,
   computed,
   AfterViewChecked,
+  OnDestroy,
   ElementRef,
   ViewChild,
+  HostListener,
 } from '@angular/core';
 import { DecimalPipe, DatePipe, NgClass } from '@angular/common';
 
@@ -26,6 +28,8 @@ hljs.registerLanguage('typescript', typescript);
 mermaid.initialize({
   startOnLoad: false,
   theme: 'dark',
+  securityLevel: 'loose',
+  flowchart: { curve: 'basis', padding: 16 },
   themeVariables: {
     primaryColor: '#10b981',
     primaryTextColor: '#f8fafc',
@@ -33,6 +37,7 @@ mermaid.initialize({
     lineColor: '#64748b',
     secondaryColor: '#1e293b',
     tertiaryColor: '#0f172a',
+    fontSize: '13px',
   },
 });
 
@@ -44,11 +49,13 @@ mermaid.initialize({
   templateUrl: './algorithm-explorer.component.html',
   styleUrl: './algorithm-explorer.component.scss',
 })
-export class AlgorithmExplorerComponent implements AfterViewChecked {
+export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
   private readonly mockService = inject(AlgorithmMockService);
   private readonly apiService = inject(ApiService);
 
   @ViewChild('docsContainer') docsContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('fsViewport') fsViewport?: ElementRef<HTMLDivElement>;
+  @ViewChild('fsContent') fsContent?: ElementRef<HTMLDivElement>;
 
   // ── Static data ──
   readonly algorithms: readonly AlgorithmInfo[] = ALGORITHMS;
@@ -73,9 +80,14 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
   readonly sourceCode = signal<string>('');
   readonly highlightedCode = signal<string>('');
 
+  // ── Fullscreen Diagram ──
+  readonly fullscreenSvg = signal<string | null>(null);
+
   // ── Mermaid rendering tracking ──
   private needsMermaidRender = false;
   private mermaidRendered = false;
+  private fsEventsAttached = false;
+  private fsCleanup: (() => void) | null = null;
 
   // ── Computed ──
   readonly selectedAlgorithm = computed(() =>
@@ -99,6 +111,20 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
   ngAfterViewChecked(): void {
     if (this.needsMermaidRender && !this.mermaidRendered && this.docsContainer) {
       this.renderMermaidDiagrams();
+    }
+    if (this.fullscreenSvg() && this.fsViewport && this.fsContent && !this.fsEventsAttached) {
+      this.attachFsZoomPan();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.fsCleanup?.();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.fullscreenSvg()) {
+      this.closeFullscreen();
     }
   }
 
@@ -166,6 +192,20 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
     }
   }
 
+  openFullscreen(svgHtml: string): void {
+    this.fullscreenSvg.set(svgHtml);
+    this.fsEventsAttached = false;
+    this.fsCleanup?.();
+    this.fsCleanup = null;
+  }
+
+  closeFullscreen(): void {
+    this.fullscreenSvg.set(null);
+    this.fsEventsAttached = false;
+    this.fsCleanup?.();
+    this.fsCleanup = null;
+  }
+
   // ── Internal ──
 
   private async loadContent(algorithmId: string): Promise<void> {
@@ -212,11 +252,11 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
       if (!pre) continue;
 
       let graphDefinition = codeEl.textContent ?? '';
-      
+
       // Fix common markdown issues for Mermaid:
       // 1. Remove carriage returns (\r) which violently crash Mermaid's jison grammar parser in Windows/HTTP environments
       graphDefinition = graphDefinition.replace(/\r/g, '');
-      
+
       // 2. Replace escaped \n string literals with HTML <br/> since Mermaid Node Strings need <br/>
       graphDefinition = graphDefinition.replace(/\\n/g, '<br/>');
 
@@ -235,7 +275,7 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
         wrapper.style.background = 'rgba(0, 0, 0, 0.2)';
         wrapper.style.borderRadius = '8px';
         wrapper.innerHTML = svg;
-        
+
         // Ensure svg resizes correctly
         const svgEl = wrapper.querySelector('svg');
         if (svgEl) {
