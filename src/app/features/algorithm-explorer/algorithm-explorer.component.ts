@@ -55,6 +55,7 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
   readonly selectedAlgorithmId = signal<string>('timsort');
   readonly activeTab = signal<'docs' | 'code'>('docs');
   readonly isExecuting = signal<boolean>(false);
+  readonly isExpanded = signal<boolean>(false);
 
   // ── Execution Results ──
   readonly executionTimeMs = signal<number | null>(null);
@@ -100,6 +101,10 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
   }
 
   // ── Actions ──
+
+  toggleExpand(): void {
+    this.isExpanded.update(v => !v);
+  }
 
   onAlgorithmChange(event: Event): void {
     const id = (event.target as HTMLSelectElement).value;

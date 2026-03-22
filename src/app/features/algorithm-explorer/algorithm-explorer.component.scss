@@ -151,6 +151,27 @@
   flex-direction: column;
   gap: 0;
   min-height: 0;
+  transition: all 0.3s ease;
+
+  &.is-expanded {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    padding: 2rem;
+    background: #f8fafc;
+    
+    :host-context(.dark) & {
+      background: #0f172a;
+    }
+
+    .algo-panel {
+      max-height: none;
+      height: 100%;
+    }
+  }
 }
 
 // ── Tab Toggle ──

@@ -30,29 +30,51 @@
     <div class="algo-split">
 
       <!-- ─── LEFT COLUMN: Theory & Code ─── -->
-      <section class="algo-left">
+      <section class="algo-left" [ngClass]="{'is-expanded': isExpanded()}">
 
-        <!-- Tab Toggle -->
-        <div class="algo-tabs">
-          <button
-            class="algo-tab"
-            [ngClass]="{'is-active': activeTab() === 'docs'}"
-            (click)="onTabChange('docs')"
+        <!-- Tab Toggle & Expand Action -->
+        <div class="algo-tabs-header" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+          <div class="algo-tabs" style="flex: 1;">
+            <button
+              class="algo-tab"
+              [ngClass]="{'is-active': activeTab() === 'docs'}"
+              (click)="onTabChange('docs')"
+            >
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+              </svg>
+              Documentación
+            </button>
+            <button
+              class="algo-tab"
+              [ngClass]="{'is-active': activeTab() === 'code'}"
+              (click)="onTabChange('code')"
+            >
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+              Código Fuente
+            </button>
+          </div>
+
+          <!-- Expand/Collapse Button -->
+          <button 
+            class="algo-expand-btn" 
+            (click)="toggleExpand()" 
+            [attr.aria-label]="isExpanded() ? 'Minimizar panel' : 'Maximizar panel'"
+            style="display: flex; align-items: center; justify-content: center; padding: 0.5rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05); color: inherit; border: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; transition: all 0.2s;"
           >
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-            </svg>
-            Documentación
-          </button>
-          <button
-            class="algo-tab"
-            [ngClass]="{'is-active': activeTab() === 'code'}"
-            (click)="onTabChange('code')"
-          >
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-            </svg>
-            Código Fuente
+            @if (isExpanded()) {
+              <!-- Minimize Icon -->
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M15 9V4.5M15 9h4.5M9 15v4.5M9 15H4.5M15 15v4.5M15 15h4.5" />
+              </svg>
+            } @else {
+              <!-- Maximize Icon -->
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+              </svg>
+            }
           </button>
         </div>
 
