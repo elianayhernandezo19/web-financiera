@@ -51,6 +51,15 @@ export class ApiService {
       .pipe(catchError(this.handleError));
   }
 
+  /**
+   * Obtiene el Top 15 de días con mayor volumen negociado
+   */
+  getTopVolumen(): Observable<ApiResponse<{ symbol: string; date: string; volume: number }[]>> {
+    return this.http
+      .get<ApiResponse<{ symbol: string; date: string; volume: number }[]>>(`${this.BASE_URL}/datos/top-volumen/ordenado`)
+      .pipe(catchError(this.handleError));
+  }
+
   /** Convierte errores HTTP en mensajes descriptivos para mostrar en la UI */
   private handleError(error: HttpErrorResponse): Observable<never> {
     const message =

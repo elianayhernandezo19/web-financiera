@@ -36,15 +36,8 @@ export class DashboardComponent {
   private currentTableOffset = 0;
   private readonly TABLE_LIMIT = 100;
 
-  // ── Datos (Mocks Top Volumen) ──
-  readonly topVolumeData = signal<{ date: string; volume: number }[]>([
-    { date: '2023-11-02', volume: 4521000000 },
-    { date: '2023-10-15', volume: 4180500000 },
-    { date: '2024-01-22', volume: 3950200000 },
-    { date: '2023-09-08', volume: 3820100000 },
-    { date: '2024-02-14', volume: 3750000000 },
-    { date: '2023-12-05', volume: 3610900000 },
-    { date: '2023-08-30', volume: 3540200000 },
+  // ── Top 15 Volumen ──
+  readonly topVolumeData = signal<{ symbol: string; date: string; volume: number }[]>([]);
     { date: '2024-03-01', volume: 3490800000 },
     { date: '2023-07-12', volume: 3420500000 },
     { date: '2023-11-28', volume: 3380100000 },
@@ -58,6 +51,21 @@ export class DashboardComponent {
   constructor() {
     this.initializeEmptyRace();
     this.loadInitialTableData();
+    this.loadTopVolume();
+  }
+
+  // ── Top 15 Volumen (API Real) ──
+  private loadTopVolume(): void {
+    this.api.getTopVolumen().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.topVolumeData.set(response.data);
+        }
+      },
+      error: (err) => console.error('API Error: No se pudo cargar el Top 15 Volumen', err)
+    });
   }
 
   // ── Datos Crudos (Paginación / Scroll Infinito) ──
