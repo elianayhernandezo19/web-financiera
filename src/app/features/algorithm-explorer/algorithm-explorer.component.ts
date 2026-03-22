@@ -211,7 +211,15 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
       const pre = codeEl.parentElement;
       if (!pre) continue;
 
-      const graphDefinition = codeEl.textContent ?? '';
+      let graphDefinition = codeEl.textContent ?? '';
+      
+      // Fix common markdown issues for Mermaid:
+      // 1. Remove carriage returns (\r) which violently crash Mermaid's jison grammar parser in Windows/HTTP environments
+      graphDefinition = graphDefinition.replace(/\r/g, '');
+      
+      // 2. Replace escaped \n string literals with HTML <br/> since Mermaid Node Strings need <br/>
+      graphDefinition = graphDefinition.replace(/\\n/g, '<br/>');
+
       const uniqueHash = Math.random().toString(36).substring(2, 9);
       const id = `mermaid-${this.selectedAlgorithmId()}-${i}-${uniqueHash}`;
 
@@ -219,10 +227,35 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
         const { svg } = await mermaid.render(id, graphDefinition);
         const wrapper = document.createElement('div');
         wrapper.className = 'mermaid-diagram';
+        // Add styling to make sure it looks professional and visible
+        wrapper.style.display = 'flex';
+        wrapper.style.justifyContent = 'center';
+        wrapper.style.margin = '2rem 0';
+        wrapper.style.padding = '1rem';
+        wrapper.style.background = 'rgba(0, 0, 0, 0.2)';
+        wrapper.style.borderRadius = '8px';
         wrapper.innerHTML = svg;
+        
+        // Ensure svg resizes correctly
+        const svgEl = wrapper.querySelector('svg');
+        if (svgEl) {
+          svgEl.style.maxWidth = '100%';
+          svgEl.style.height = 'auto';
+        }
+
         pre.replaceWith(wrapper);
       } catch (err) {
-        console.warn('Mermaid render error:', err);
+        console.warn('Mermaid render error for diagram:', graphDefinition, err);
+        const errorDiv = document.createElement('div');
+        errorDiv.style.border = '1px solid #ef4444';
+        errorDiv.style.background = 'rgba(239, 68, 68, 0.1)';
+        errorDiv.style.padding = '1rem';
+        errorDiv.style.borderRadius = '8px';
+        errorDiv.innerHTML = `
+          <strong style="color: #ef4444;">Detección de Error en Diagrama Mermaid:</strong>
+          <pre style="color: #f8fafc; font-size: 11px; margin-top: 0.5rem; white-space: pre-wrap;">${graphDefinition}</pre>
+        `;
+        pre.replaceWith(errorDiv);
       }
     }
   }
