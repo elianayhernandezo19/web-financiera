@@ -5,10 +5,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { AlgorithmInfo, FinancialAsset, ExecutionEntry, SortRecord } from '@core';
 import { ApiService, ALGORITHMS, FINANCIAL_ASSETS } from '@core';
 
-import { ControlPanelComponent } from './components/control-panel/control-panel.component';
-import { SortChartComponent } from './components/sort-chart/sort-chart.component';
-import { ResultsTableComponent } from './components/results-table/results-table.component';
-import { AlgorithmCardComponent } from './components/algorithm-card/algorithm-card.component';
+import {
+  ControlPanelComponent,
+  SortChartComponent,
+  ResultsTableComponent,
+  AlgorithmCardComponent,
+} from './components';
 
 /**
  * DashboardComponent — smart component orquestador.
