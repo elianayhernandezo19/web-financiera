@@ -209,7 +209,7 @@
 
   &.is-fullscreen {
     position: fixed;
-    inset: 0;
+    inset: 4rem 0 0 0; // Se alinea debajo de los 4rem del Navbar global
     z-index: 1000;
     border-radius: 0;
     border: none;
