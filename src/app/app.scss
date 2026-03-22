@@ -179,6 +179,46 @@
   flex-shrink: 0;
 }
 
+// ── Nav Button ──
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: $radius-lg;
+  font-size: $text-xs;
+  font-weight: 600;
+  text-decoration: none;
+  background: transparent;
+  color: $brand-600;
+  border: 1px solid rgba($brand-500, 0.3);
+  transition: all $transition-fast;
+
+  &:hover {
+    background: rgba($brand-500, 0.08);
+    border-color: rgba($brand-500, 0.6);
+  }
+
+  :host-context(.dark) & {
+    color: $brand-400;
+    border-color: rgba($brand-400, 0.3);
+    &:hover {
+      background: rgba($brand-400, 0.1);
+      border-color: rgba($brand-400, 0.6);
+    }
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &__text {
+    display: none;
+    @include sm { display: inline; }
+  }
+}
+
 .theme-label {
   display: none;
   font-size: $text-xs;

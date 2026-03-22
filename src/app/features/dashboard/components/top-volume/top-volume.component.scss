@@ -7,16 +7,25 @@
   height: 100%;
   font-family: $font-mono;
   font-size: $text-sm;
-  color: $text-primary;
+  color: $gray-800; // LIGHT MODE
+
+  :host-context(.dark) & {
+    color: $text-primary;
+  }
 
   &__header {
     display: flex;
     justify-content: space-between;
     padding: 0.5rem 0.5rem 0.75rem 2.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    color: $gray-400;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1); // LIGHT MODE
+    color: $gray-500; // LIGHT MODE
     font-size: 10px;
     letter-spacing: 0.1em;
+
+    :host-context(.dark) & {
+      border-color: rgba(255, 255, 255, 0.1);
+      color: $gray-400;
+    }
   }
 
   &__col {
@@ -66,13 +75,20 @@
 
   &__date {
     flex: 1;
-    color: $gray-200;
+    color: $gray-500; // LIGHT MODE
+    :host-context(.dark) & {
+      color: $gray-200;
+    }
   }
 
   &__value {
-    color: $brand-300;
+    color: $brand-600; // LIGHT MODE
     font-weight: 600;
-    text-shadow: 0 0 8px rgba($brand-500, 0.3);
+    
+    :host-context(.dark) & {
+      color: $brand-300;
+      text-shadow: 0 0 8px rgba($brand-500, 0.3);
+    }
   }
 }
 

@@ -5,15 +5,24 @@
   flex: 1;
   position: relative;
   overflow: hidden;
-  background-color: $gray-950;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  
+  // DEFAULT LIGHT MODE
+  background-color: $gray-50;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
   background-size: 32px 32px;
-  color: $text-primary;
+  color: $gray-900;
   padding: 1rem 1.5rem;
   font-family: $font-sans;
   display: flex;
   flex-direction: column;
   min-height: 0;
+
+  // DARK MODE
+  :host-context(.dark) & {
+    background-color: $gray-950;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    color: $text-primary;
+  }
 
   @include md {
     padding: 1rem 2rem;
@@ -27,8 +36,8 @@
   margin: 0 auto;
   display: grid;
   gap: 1.5rem;
-  // CSS Grid Principal
-  grid-template-rows: 1fr 1.5fr;
+  // LIMIT HORIZONTAL CHART HEIGHT STRICTLY
+  grid-template-rows: minmax(30%, 35%) 1fr;
   grid-template-columns: 1fr;
   grid-template-areas:
     "race-track"
@@ -40,13 +49,21 @@
 // PANELES GLASSMORPHISM (Reutilizable)
 // ==========================================
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75); // $gray-900 translúcido
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  // LIGHT MODE
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: $radius-xl;
-  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   padding: 1.5rem;
+
+  // DARK MODE
+  :host-context(.dark) & {
+    background: rgba(15, 23, 42, 0.75); // $gray-900 translúcido
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.5);
+  }
 }
 
 .cmd-section-title {
@@ -55,11 +72,16 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: $gray-400;
+  color: $gray-600; // LIGHT MODE
   margin-bottom: 1.25rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
+  // DARK MODE
+  :host-context(.dark) & {
+    color: $gray-400;
+  }
 
   &::before {
     content: '';

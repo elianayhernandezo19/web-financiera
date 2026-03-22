@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, RouterLink } from '@angular/router';
 import { ThemeService } from '@core';
 
 /**
@@ -14,12 +14,12 @@ import { ThemeService } from '@core';
  */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, RouterLink],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App {
-  readonly theme = inject(ThemeService);
+  readonly theme: ThemeService = inject(ThemeService);
 
   /** Autores del proyecto — se renderizan como badges en el Navbar */
   readonly authors = ['Juan David', 'Eliana Yiset', 'Andrés Felipe'] as const;
