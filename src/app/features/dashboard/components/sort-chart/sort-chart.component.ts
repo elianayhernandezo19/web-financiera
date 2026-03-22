@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, input, computed, inject } from '@an
 import { BaseChartDirective } from 'ng2-charts';
 import type { ChartData, ChartOptions } from 'chart.js';
 
-import type { ExecutionEntry } from '../../../../core';
-import { ThemeService, BAR_COLORS } from '../../../../core';
+import type { ExecutionEntry } from '@core';
+import { ThemeService, BAR_COLORS } from '@core';
 
 /**
  * SortChartComponent — diagrama de barras comparativo con tema reactivo.

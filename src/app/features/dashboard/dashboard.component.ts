@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed, DestroyRe
 import { DecimalPipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import type { AlgorithmInfo, FinancialAsset, ExecutionEntry, SortRecord } from '../../core';
-import { ApiService, ALGORITHMS, FINANCIAL_ASSETS } from '../../core';
+import type { AlgorithmInfo, FinancialAsset, ExecutionEntry, SortRecord } from '@core';
+import { ApiService, ALGORITHMS, FINANCIAL_ASSETS } from '@core';
 
 import { ControlPanelComponent } from './components/control-panel/control-panel.component';
 import { SortChartComponent } from './components/sort-chart/sort-chart.component';

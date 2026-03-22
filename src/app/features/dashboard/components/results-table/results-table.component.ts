@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 
-import type { SortRecord } from '../../../../core';
+import type { SortRecord } from '@core';
 
 /**
  * ResultsTableComponent — tabla de alto rendimiento con Virtual Scroll.

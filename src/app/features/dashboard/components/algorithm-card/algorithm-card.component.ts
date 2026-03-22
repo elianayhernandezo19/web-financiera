@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-import type { AlgorithmInfo } from '../../../../core';
+import type { AlgorithmInfo } from '@core';
 
 /**
  * AlgorithmCardComponent — ficha técnica Big O del algoritmo seleccionado.

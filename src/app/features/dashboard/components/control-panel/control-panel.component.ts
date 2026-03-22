@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
-import type { AlgorithmInfo, FinancialAsset } from '../../../../core';
+import type { AlgorithmInfo, FinancialAsset } from '@core';
 
 /**
  * ControlPanelComponent — presentacional (dumb).
