@@ -109,17 +109,21 @@ export class DashboardComponent {
   }
 
   // ── Simulación Visual de Carrera (Real API o Fallback) ──
+  private fakeRaceInterval: any;
+
   onSimulateRace(): void {
     if (this.isRacing() || this.isExecutingApi()) return;
     
     this.isExecutingApi.set(true);
     this.initializeEmptyRace();
+    this.startFakeRace();
 
     // Llamar al endpoint real de Node.js (toma bastante tiempo por los 63k registros en todos los algos)
     this.api.runRace().pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (response) => {
+        this.stopFakeRace();
         this.isExecutingApi.set(false);
         if (response.success && response.data?.raceResults) {
           // Extraer los tiempos reales del backend
@@ -137,13 +141,40 @@ export class DashboardComponent {
       },
       error: (err) => {
         console.error('Error contacting backend, using mocks...', err);
+        this.stopFakeRace();
         this.isExecutingApi.set(false);
         this.startVisualRace(null); // fallback
       }
     });
   }
 
+  private startFakeRace(): void {
+    this.isRacing.set(true);
+    const velocities = ALGORITHMS.map(() => Math.random() * 8 + 2); // Velocidades simuladas
+    
+    this.fakeRaceInterval = setInterval(() => {
+      const currentEntries = this.racingExecutionTimes().map((entry, idx) => {
+        return {
+          ...entry,
+          timeMs: entry.timeMs + velocities[idx] + (Math.random() * 5)
+        };
+      });
+
+      // Ordenar por tiempo constantemente
+      currentEntries.sort((a, b) => a.timeMs - b.timeMs);
+      this.racingExecutionTimes.set(currentEntries);
+    }, 50); // 20 frames por segundo durante la espera
+  }
+
+  private stopFakeRace(): void {
+    if (this.fakeRaceInterval) {
+      clearInterval(this.fakeRaceInterval);
+      this.fakeRaceInterval = null;
+    }
+  }
+
   private startVisualRace(apiTimes: Record<string, number> | null): void {
+    this.initializeEmptyRace(); // Se resetea la carrera falsa al iniciar el sprint verdadero de 2 segundos
     this.isRacing.set(true);
     
     // Valores por defecto si la API falla o devuelve nulo

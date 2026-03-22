@@ -57,7 +57,7 @@
         </header>
 
         <div class="cmd-table-wrapper">
-          <app-results-table [data]="sortedData()" />
+          <app-results-table [data]="sortedData()" [loadingMore]="isLoadingTable()" (loadMore)="onLoadMoreTableData()" />
         </div>
       </section>
 
