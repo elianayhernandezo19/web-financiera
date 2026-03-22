@@ -42,6 +42,35 @@ mermaid.initialize({
   },
 });
 
+/**
+ * Reliably get the intrinsic width or height of a Mermaid-generated SVG.
+ * Mermaid sets explicit width/height attributes (e.g. "1543.4765625").
+ * Falls back to viewBox, then getBBox, then getBoundingClientRect.
+ */
+function getSvgIntrinsicSize(svg: SVGSVGElement, dim: 'width' | 'height'): number {
+  // 1) Explicit attribute (most reliable for Mermaid)
+  const attr = parseFloat(svg.getAttribute(dim) || '');
+  if (attr > 0) return attr;
+
+  // 2) viewBox
+  const vb = svg.viewBox?.baseVal;
+  if (vb) {
+    const v = dim === 'width' ? vb.width : vb.height;
+    if (v > 0) return v;
+  }
+
+  // 3) getBBox (SVG internal coordinate system)
+  try {
+    const bbox = svg.getBBox();
+    const v = dim === 'width' ? bbox.width : bbox.height;
+    if (v > 0) return v;
+  } catch { /* getBBox can throw if SVG not in DOM */ }
+
+  // 4) getBoundingClientRect (layout size, last resort)
+  const rect = svg.getBoundingClientRect();
+  return dim === 'width' ? rect.width : rect.height;
+}
+
 @Component({
   selector: 'app-algorithm-explorer',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -350,9 +379,9 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
       const vpH = viewport.clientHeight;
       if (vpW === 0 || vpH === 0) return;
 
-      // Remove any fixed width/height on SVG so it reports intrinsic size
-      const svgW = svgEl.viewBox?.baseVal?.width || parseFloat(svgEl.getAttribute('width') || '0') || svgEl.scrollWidth;
-      const svgH = svgEl.viewBox?.baseVal?.height || parseFloat(svgEl.getAttribute('height') || '0') || svgEl.scrollHeight;
+      // Robust SVG intrinsic size detection
+      const svgW = getSvgIntrinsicSize(svgEl, 'width');
+      const svgH = getSvgIntrinsicSize(svgEl, 'height');
       if (svgW === 0 || svgH === 0) return;
 
       const pad = 24;
@@ -364,8 +393,8 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
       // Center the diagram
       const scaledW = svgW * zoom;
       const scaledH = svgH * zoom;
-      panX = Math.max(0, (vpW - scaledW) / 2);
-      panY = Math.max(0, (vpH - scaledH) / 2);
+      panX = (vpW - scaledW) / 2;
+      panY = (vpH - scaledH) / 2;
 
       applyTransform();
     };
@@ -492,14 +521,14 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
       const vpH = viewport.clientHeight;
       if (vpW === 0 || vpH === 0) return;
 
-      const svgW = svgEl.viewBox?.baseVal?.width || parseFloat(svgEl.getAttribute('width') || '0') || svgEl.scrollWidth;
-      const svgH = svgEl.viewBox?.baseVal?.height || parseFloat(svgEl.getAttribute('height') || '0') || svgEl.scrollHeight;
+      const svgW = getSvgIntrinsicSize(svgEl, 'width');
+      const svgH = getSvgIntrinsicSize(svgEl, 'height');
       if (svgW === 0 || svgH === 0) return;
 
-      const pad = 48;
+      const pad = 64;
       const fitW = (vpW - pad) / svgW;
       const fitH = (vpH - pad) / svgH;
-      zoom = Math.min(fitW, fitH, 1.5);
+      zoom = Math.min(fitW, fitH, 1); // cap at 100%
       zoom = Math.max(0.05, zoom);
 
       const scaledW = svgW * zoom;
