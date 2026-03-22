@@ -252,12 +252,7 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
       if (!pre) continue;
 
       let graphDefinition = codeEl.textContent ?? '';
-
-      // Fix common markdown issues for Mermaid:
-      // 1. Remove carriage returns (\r) which violently crash Mermaid's jison grammar parser in Windows/HTTP environments
       graphDefinition = graphDefinition.replace(/\r/g, '');
-
-      // 2. Replace escaped \n string literals with HTML <br/> since Mermaid Node Strings need <br/>
       graphDefinition = graphDefinition.replace(/\\n/g, '<br/>');
 
       const uniqueHash = Math.random().toString(36).substring(2, 9);
@@ -265,38 +260,277 @@ export class AlgorithmExplorerComponent implements AfterViewChecked, OnDestroy {
 
       try {
         const { svg } = await mermaid.render(id, graphDefinition);
-        const wrapper = document.createElement('div');
-        wrapper.className = 'mermaid-diagram';
-        // Add styling to make sure it looks professional and visible
-        wrapper.style.display = 'flex';
-        wrapper.style.justifyContent = 'center';
-        wrapper.style.margin = '2rem 0';
-        wrapper.style.padding = '1rem';
-        wrapper.style.background = 'rgba(0, 0, 0, 0.2)';
-        wrapper.style.borderRadius = '8px';
-        wrapper.innerHTML = svg;
-
-        // Ensure svg resizes correctly
-        const svgEl = wrapper.querySelector('svg');
-        if (svgEl) {
-          svgEl.style.maxWidth = '100%';
-          svgEl.style.height = 'auto';
-        }
-
+        const wrapper = this.createDiagramWrapper(svg, i);
         pre.replaceWith(wrapper);
       } catch (err) {
-        console.warn('Mermaid render error for diagram:', graphDefinition, err);
+        console.warn('Mermaid render error for diagram:', err);
         const errorDiv = document.createElement('div');
-        errorDiv.style.border = '1px solid #ef4444';
-        errorDiv.style.background = 'rgba(239, 68, 68, 0.1)';
-        errorDiv.style.padding = '1rem';
-        errorDiv.style.borderRadius = '8px';
-        errorDiv.innerHTML = `
-          <strong style="color: #ef4444;">Detección de Error en Diagrama Mermaid:</strong>
-          <pre style="color: #f8fafc; font-size: 11px; margin-top: 0.5rem; white-space: pre-wrap;">${graphDefinition}</pre>
-        `;
+        errorDiv.className = 'mermaid-error';
+        errorDiv.innerHTML = `<strong>Error en diagrama Mermaid</strong><pre>${this.escapeHtml(graphDefinition)}</pre>`;
         pre.replaceWith(errorDiv);
       }
     }
   }
-}
+
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  private createDiagramWrapper(svg: string, diagramIndex: number): HTMLElement {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'mermaid-container';
+
+    wrapper.innerHTML = `
+      <div class="mermaid-toolbar">
+        <span class="mermaid-toolbar__label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+          Diagrama ${diagramIndex + 1}
+        </span>
+        <div class="mermaid-toolbar__actions">
+          <button class="mermaid-btn" data-action="zoom-out" title="Alejar (-)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <span class="mermaid-zoom-label">100%</span>
+          <button class="mermaid-btn" data-action="zoom-in" title="Acercar (+)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <span class="mermaid-toolbar__sep"></span>
+          <button class="mermaid-btn" data-action="fit" title="Ajustar al contenedor">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+          </button>
+          <button class="mermaid-btn" data-action="fullscreen" title="Pantalla completa">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="mermaid-viewport">
+        <div class="mermaid-content">${svg}</div>
+      </div>
+      <div class="mermaid-hint">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Scroll para zoom · Arrastra para mover
+      </div>
+    `;
+
+    this.attachZoomPanEvents(wrapper);
+    return wrapper;
+  }
+
+  private attachZoomPanEvents(wrapper: HTMLElement): void {
+    let zoom = 1;
+    let panX = 0;
+    let panY = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+
+    const viewport = wrapper.querySelector('.mermaid-viewport') as HTMLElement;
+    const content = wrapper.querySelector('.mermaid-content') as HTMLElement;
+    const zoomLabel = wrapper.querySelector('.mermaid-zoom-label') as HTMLElement;
+
+    const applyTransform = () => {
+      content.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+      zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
+    };
+
+    const autoFit = () => {
+      const svgEl = content.querySelector('svg');
+      if (!svgEl || viewport.offsetWidth === 0) return;
+      const svgW = parseFloat(svgEl.getAttribute('width') || '0') || svgEl.getBoundingClientRect().width;
+      const svgH = parseFloat(svgEl.getAttribute('height') || '0') || svgEl.getBoundingClientRect().height;
+      const vpW = viewport.clientWidth - 32;
+      const vpH = viewport.clientHeight - 32;
+      if (svgW > vpW || svgH > vpH) {
+        zoom = Math.min(vpW / svgW, vpH / svgH);
+        zoom = Math.max(0.05, Math.min(1, zoom));
+      }
+      panX = 0;
+      panY = 0;
+      applyTransform();
+    };
+
+    // Auto-fit on first render
+    requestAnimationFrame(autoFit);
+
+    // Wheel zoom (centered on pointer)
+    viewport.addEventListener('wheel', (e: WheelEvent) => {
+      e.preventDefault();
+      const factor = e.deltaY > 0 ? 0.9 : 1.1;
+      const rect = viewport.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const oldZoom = zoom;
+      zoom = Math.max(0.05, Math.min(5, zoom * factor));
+      const ratio = zoom / oldZoom;
+      panX = mx - ratio * (mx - panX);
+      panY = my - ratio * (my - panY);
+      applyTransform();
+    }, { passive: false });
+
+    // Pointer drag
+    viewport.addEventListener('pointerdown', (e: PointerEvent) => {
+      if (e.button !== 0) return;
+      isDragging = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+      viewport.setPointerCapture(e.pointerId);
+      viewport.classList.add('is-dragging');
+    });
+
+    viewport.addEventListener('pointermove', (e: PointerEvent) => {
+      if (!isDragging) return;
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      applyTransform();
+    });
+
+    viewport.addEventListener('pointerup', (e: PointerEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      viewport.releasePointerCapture(e.pointerId);
+      viewport.classList.remove('is-dragging');
+    });
+
+    // Toolbar buttons
+    wrapper.querySelectorAll('.mermaid-btn').forEach(btn => {
+      btn.addEventListener('click', (e: Event) => {
+        e.stopPropagation();
+        const action = (btn as HTMLElement).dataset['action'];
+        switch (action) {
+          case 'zoom-in':
+            zoom = Math.min(5, zoom * 1.3);
+            applyTransform();
+            break;
+          case 'zoom-out':
+            zoom = Math.max(0.05, zoom * 0.7);
+            applyTransform();
+            break;
+          case 'fit':
+            zoom = 1;
+            panX = 0;
+            panY = 0;
+            applyTransform();
+            requestAnimationFrame(autoFit);
+            break;
+          case 'fullscreen':
+            this.openFullscreen(content.innerHTML);
+            break;
+        }
+      });
+    });
+  }
+
+  private attachFsZoomPan(): void {
+    this.fsEventsAttached = true;
+    this.fsCleanup?.();
+
+    const viewport = this.fsViewport!.nativeElement;
+    const content = this.fsContent!.nativeElement;
+
+    let zoom = 1;
+    let panX = 0;
+    let panY = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+
+    const zoomLabel = viewport.closest('.fs-container')?.querySelector('.fs-zoom-label') as HTMLElement | null;
+
+    const applyTransform = () => {
+      content.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+      if (zoomLabel) zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
+    };
+
+    // Auto-fit for fullscreen
+    requestAnimationFrame(() => {
+      const svgEl = content.querySelector('svg');
+      if (!svgEl || viewport.offsetWidth === 0) return;
+      const svgW = parseFloat(svgEl.getAttribute('width') || '0') || svgEl.getBoundingClientRect().width;
+      const svgH = parseFloat(svgEl.getAttribute('height') || '0') || svgEl.getBoundingClientRect().height;
+      const vpW = viewport.clientWidth - 64;
+      const vpH = viewport.clientHeight - 64;
+      if (svgW > vpW || svgH > vpH) {
+        zoom = Math.min(vpW / svgW, vpH / svgH);
+        zoom = Math.max(0.05, zoom);
+      }
+      panX = 0;
+      panY = 0;
+      applyTransform();
+    });
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const factor = e.deltaY > 0 ? 0.9 : 1.1;
+      const rect = viewport.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const oldZoom = zoom;
+      zoom = Math.max(0.05, Math.min(5, zoom * factor));
+      const ratio = zoom / oldZoom;
+      panX = mx - ratio * (mx - panX);
+      panY = my - ratio * (my - panY);
+      applyTransform();
+    };
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.button !== 0) return;
+      isDragging = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+      viewport.setPointerCapture(e.pointerId);
+      viewport.classList.add('is-dragging');
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!isDragging) return;
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      applyTransform();
+    };
+
+    const onPointerUp = (e: PointerEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      viewport.releasePointerCapture(e.pointerId);
+      viewport.classList.remove('is-dragging');
+    };
+
+    viewport.addEventListener('wheel', onWheel, { passive: false });
+    viewport.addEventListener('pointerdown', onPointerDown);
+    viewport.addEventListener('pointermove', onPointerMove);
+    viewport.addEventListener('pointerup', onPointerUp);
+
+    // Fullscreen toolbar buttons
+    const fsContainer = viewport.closest('.fs-container');
+    const btnHandler = (e: Event) => {
+      const action = (e.currentTarget as HTMLElement).dataset['fsAction'];
+      switch (action) {
+        case 'zoom-in':
+          zoom = Math.min(5, zoom * 1.3);
+          applyTransform();
+          break;
+        case 'zoom-out':
+          zoom = Math.max(0.05, zoom * 0.7);
+          applyTransform();
+          break;
+        case 'fit':
+          zoom = 1; panX = 0; panY = 0;
+          applyTransform();
+          break;
+      }
+    };
+
+    const fsBtns = fsContainer?.querySelectorAll('[data-fs-action]') ?? [];
+    fsBtns.forEach(btn => btn.addEventListener('click', btnHandler));
+
+    this.fsCleanup = () => {
+      viewport.removeEventListener('wheel', onWheel);
+      viewport.removeEventListener('pointerdown', onPointerDown);
+      viewport.removeEventListener('pointermove', onPointerMove);
+      viewport.removeEventListener('pointerup', onPointerUp);
+      fsBtns.forEach(btn => btn.removeEventListener('click', btnHandler));
+    };
