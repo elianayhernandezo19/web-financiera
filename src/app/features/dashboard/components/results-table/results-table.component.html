@@ -30,10 +30,10 @@
         class="table-row"
       >
         <span class="table-cell table-cell--date">{{ row.date }}</span>
-        <span class="table-cell table-cell--number">{{ row.openPrice | number: '1.2-2' }}</span>
-        <span class="table-cell table-cell--brand">{{ row.closePrice | number: '1.2-2' }}</span>
-        <span class="table-cell table-cell--number">{{ row.highPrice | number: '1.2-2' }}</span>
-        <span class="table-cell table-cell--number">{{ row.lowPrice | number: '1.2-2' }}</span>
+        <span class="table-cell table-cell--number">{{ row.open | number: '1.2-2' }}</span>
+        <span class="table-cell table-cell--brand">{{ row.close | number: '1.2-2' }}</span>
+        <span class="table-cell table-cell--number">{{ row.high | number: '1.2-2' }}</span>
+        <span class="table-cell table-cell--number">{{ row.low | number: '1.2-2' }}</span>
         <span class="table-cell table-cell--volume">{{ row.volume | number: '1.0-0' }}</span>
       </div>
     </cdk-virtual-scroll-viewport>

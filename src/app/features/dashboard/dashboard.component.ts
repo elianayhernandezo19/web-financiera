@@ -78,16 +78,26 @@ export class DashboardComponent {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
+    const symbol = this.selectedAssetInfo().ticker;
+
     this.api
-      .executeSort({ algorithm: this.selectedAlgorithmId() })
+      .executeSort({ algorithm: this.selectedAlgorithmId(), symbol })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
+          if (!res.success) {
+            this.errorMessage.set(res.message || 'Error desde el servidor');
+            this.isLoading.set(false);
+            return;
+          }
+          
+          const executionResult = res.data;
+          
           this.executionTimes.update(prev => [
             ...prev,
-            { algorithmId: res.algorithm, algorithmName: this.selectedAlgorithmInfo().name, timeMs: res.executionTimeMs },
+            { algorithmId: this.selectedAlgorithmId(), algorithmName: executionResult.algorithm, timeMs: executionResult.executionTimeMs },
           ]);
-          this.sortedData.set(res.sortedData);
+          this.sortedData.set(executionResult.data);
           this.isLoading.set(false);
         },
         error: (err: Error) => {

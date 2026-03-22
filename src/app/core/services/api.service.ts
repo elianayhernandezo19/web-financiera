@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
-import type { SortRequest, SortResponse } from '../models';
+import type { SortRequest, ApiResponse, SortExecutionResult } from '../models';
 
 /**
  * ApiService — única capa de comunicación con el backend Node.js.
@@ -24,17 +24,12 @@ export class ApiService {
 
   /**
    * Ejecuta un algoritmo de ordenamiento sobre los datos financieros del backend.
-   *
-   * POST /api/sort/execute
-   *   Body:    { algorithm: string }
-   *   Returns: SortResponse (datos ordenados + métricas de tiempo)
-   *
-   * El manejo de errores está centralizado en `handleError` para que los
-   * componentes solo reciban un `Error` con mensaje legible, no un HttpErrorResponse crudo.
+   * Ejecuta el algoritmo llamando a /api/v1/algoritmos/ejecutar
+   * @param request Nombre del algoritmo y opcionalmente el símbolo
    */
-  executeSort(request: SortRequest): Observable<SortResponse> {
+  executeSort(request: SortRequest): Observable<ApiResponse<SortExecutionResult>> {
     return this.http
-      .post<SortResponse>(`${this.BASE_URL}/sort/execute`, request)
+      .post<ApiResponse<SortExecutionResult>>(`${this.BASE_URL}/algoritmos/ejecutar`, request)
       .pipe(catchError(this.handleError));
   }
 

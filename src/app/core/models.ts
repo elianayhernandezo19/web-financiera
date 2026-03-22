@@ -1,27 +1,5 @@
-// ═══════════════════════════════════════════════════════════════
-// Modelos del dominio — consolidados en un solo archivo
-// ═══════════════════════════════════════════════════════════════
+export type AssetType = 'stock' | 'crypto' | 'forex' | 'index';
 
-// ── Algoritmos ──
-
-/** Ficha técnica de complejidad Big O para cada algoritmo */
-export interface AlgorithmInfo {
-  readonly id: string;
-  readonly name: string;
-  readonly bestCase: string;
-  readonly averageCase: string;
-  readonly worstCase: string;
-  readonly spaceComplexity: string;
-  readonly stable: boolean;
-  readonly description: string;
-}
-
-// ── Activos Financieros ──
-
-/** Tipo de activo financiero */
-export type AssetType = 'stock' | 'index' | 'crypto' | 'commodity';
-
-/** Modelo para un activo financiero disponible en el selector */
 export interface FinancialAsset {
   readonly id: string;
   readonly name: string;
@@ -29,36 +7,58 @@ export interface FinancialAsset {
   readonly type: AssetType;
 }
 
-// ── Ordenamiento / API ──
+export interface AlgorithmInfo {
+  readonly id: string;
+  readonly name: string;
+  readonly complexity: {
+    readonly best: string;
+    readonly average: string;
+    readonly worst: string;
+    readonly space: string;
+  };
+  readonly description?: string;
+}
 
-/** Payload enviado al endpoint POST /api/sort/execute */
+// ── Models format mapped to backend Node.js API ──
+
 export interface SortRequest {
   readonly algorithm: string;
+  readonly symbol?: string;
 }
 
-/** Un registro financiero individual devuelto por la API (ya ordenado) */
 export interface SortRecord {
+  readonly symbol?: string;
   readonly date: string;
-  readonly closePrice: number;
-  readonly openPrice?: number;
-  readonly highPrice?: number;
-  readonly lowPrice?: number;
-  readonly volume?: number;
-  readonly [key: string]: unknown;
+  readonly open: number;
+  readonly high: number;
+  readonly low: number;
+  readonly close: number;
+  readonly volume: number;
 }
 
-/** Respuesta completa del API tras ejecutar el ordenamiento */
-export interface SortResponse {
+export interface SortExecutionResult {
   readonly algorithm: string;
+  readonly size: number;
   readonly executionTimeMs: number;
-  readonly recordCount: number;
-  readonly sortedData: SortRecord[];
+  readonly complexity: AlgorithmInfo['complexity'];
+  readonly data: SortRecord[];
 }
 
-/**
- * Entrada del historial de tiempos para la gráfica comparativa.
- * Se guarda en el signal `executionTimes` del DashboardComponent.
- */
+export interface ApiResponse<T> {
+  readonly success: boolean;
+  readonly data: T;
+  readonly meta?: {
+    readonly n?: number;
+    readonly timestamp?: string;
+    readonly total?: number;
+    readonly [key: string]: unknown;
+  };
+  readonly statusCode?: number;
+  readonly message?: string;
+}
+
+// ── UI state models ──
+
 export interface ExecutionEntry {
   readonly algorithmId: string;
   readonly algorithmName: string;
