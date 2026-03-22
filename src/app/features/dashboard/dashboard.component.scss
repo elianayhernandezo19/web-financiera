@@ -182,7 +182,7 @@
   min-height: 0; // prevent blowout
 
   @include xl {
-    grid-template-columns: 350px 1fr;
+    grid-template-columns: 450px 1fr;
   }
 }
 

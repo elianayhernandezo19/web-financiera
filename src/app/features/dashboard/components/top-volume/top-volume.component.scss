@@ -17,7 +17,7 @@
     display: grid;
     grid-template-columns: 2rem 5rem 1fr auto;
     gap: 0.5rem;
-    padding: 0.5rem;
+    padding: 0.25rem 0.5rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1); // LIGHT MODE
     color: $gray-500; // LIGHT MODE
     font-size: 10px;
@@ -58,7 +58,7 @@
     grid-template-columns: 2rem 5rem 1fr auto;
     gap: 0.5rem;
     align-items: center;
-    padding: 0.5rem;
+    padding: 0.25rem 0.5rem;
     border-radius: $radius-md;
     transition: background $transition-fast;
     animation: fade-in-up 0.3s ease-out backwards;
