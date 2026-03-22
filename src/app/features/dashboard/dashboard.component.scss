@@ -94,46 +94,50 @@
 }
 
 // ==========================================
-// BOTÓN FLOTANTE (FAB)
+// BOTÓN EJECUCIÓN (INLINE)
 // ==========================================
-.cmd-fab {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  z-index: 50;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: $brand-500;
-  color: #fff;
-  border: none;
-  display: flex;
+.cmd-btn-play {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 32px rgba($brand-500, 0.4);
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: $radius-lg;
+  font-size: $text-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba($brand-500, 0.1);
+  color: $brand-600; // LIGHT MODE
+  border: 1px solid rgba($brand-500, 0.3);
+  transition: all $transition-fast;
   cursor: pointer;
-  transition: all $transition-base;
 
-  svg {
-    width: 24px;
-    height: 24px;
+  :host-context(.dark) & {
+    color: $brand-400;
   }
 
   &:hover:not(:disabled) {
-    background: $brand-400;
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 12px 40px rgba($brand-500, 0.5);
+    background: rgba($brand-500, 0.15);
+    border-color: rgba($brand-500, 0.6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($brand-500, 0.2);
   }
 
   &:active:not(:disabled) {
-    transform: translateY(0) scale(0.95);
+    transform: translateY(0);
+    box-shadow: none;
   }
 
   &:disabled {
-    background: rgba($brand-500, 0.3);
+    background: transparent;
+    border-color: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.4);
     cursor: wait;
-    box-shadow: none;
-    color: rgba(255, 255, 255, 0.6);
+
+    :host-context(.dark) & {
+      border-color: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.4);
+    }
   }
 }
 
