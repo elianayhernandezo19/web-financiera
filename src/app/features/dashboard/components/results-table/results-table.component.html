@@ -31,7 +31,7 @@
     </div>
 
     <!-- Filas virtualizadas -->
-    <cdk-virtual-scroll-viewport itemSize="48" class="table-viewport" (scrolledIndexChange)="onScroll($event)">
+    <cdk-virtual-scroll-viewport itemSize="26" class="table-viewport" (scrolledIndexChange)="onScroll($event)">
       <div
         *cdkVirtualFor="let row of data(); trackBy: trackByDate"
         class="table-row"

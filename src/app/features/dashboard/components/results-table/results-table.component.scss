@@ -96,31 +96,39 @@
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 0.5rem;
-  padding: 0 1rem;
+  padding: 0 0.75rem;
   align-items: center;
-  height: 3rem;
+  height: 26px; // Reducido mucho
   border-bottom: 1px solid rgba($gray-50, 1);
   transition: background-color 75ms ease;
 
+  &:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+    
+    :host-context(.dark) & {
+      background-color: rgba(255, 255, 255, 0.015);
+    }
+  }
+
   &:hover {
-    background: rgba($brand-50, 0.5);
+    background: rgba($brand-50, 0.5) !important;
   }
 
   :host-context(.dark) & {
     border-color: rgba(255, 255, 255, 0.03);
 
     &:hover {
-      background: rgba($brand-500, 0.035);
+      background: rgba($brand-500, 0.05) !important;
     }
   }
 }
 
 .table-cell {
-  font-size: $text-sm;
+  font-size: 11px; // Reducido
 
   &--date {
     font-family: $font-mono;
-    font-size: 11px;
+    font-size: 10px;
     color: $gray-400;
     @include truncate;
     :host-context(.dark) & { color: $gray-500; }
@@ -144,7 +152,7 @@
   &--volume {
     text-align: right;
     font-variant-numeric: tabular-nums;
-    font-size: $text-xs;
+    font-size: 10px;
     color: $gray-400;
     :host-context(.dark) & { color: $gray-500; }
   }
