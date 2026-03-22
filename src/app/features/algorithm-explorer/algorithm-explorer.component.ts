@@ -10,8 +10,9 @@ import {
 } from '@angular/core';
 import { DecimalPipe, DatePipe, NgClass } from '@angular/common';
 
-import { ALGORITHMS, AlgorithmMockService } from '@core';
+import { ALGORITHMS, AlgorithmMockService, ApiService } from '@core';
 import type { SortRecord, AlgorithmInfo } from '@core';
+import { firstValueFrom } from 'rxjs';
 
 import { marked } from 'marked';
 import mermaid from 'mermaid';
@@ -45,6 +46,7 @@ mermaid.initialize({
 })
 export class AlgorithmExplorerComponent implements AfterViewChecked {
   private readonly mockService = inject(AlgorithmMockService);
+  private readonly apiService = inject(ApiService);
 
   @ViewChild('docsContainer') docsContainer!: ElementRef<HTMLDivElement>;
 
@@ -136,10 +138,12 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
     this.currentPage.set(1);
 
     try {
-      const result = await this.mockService.executeAlgorithm(this.selectedAlgorithmId());
-      this.executionTimeMs.set(result.executionTimeMs);
-      this.recordsSorted.set(result.recordsSorted);
-      this.resultData.set(result.data);
+      const response = await firstValueFrom(this.apiService.executeAlgorithmLab(this.selectedAlgorithmId()));
+      if (response && response.data) {
+        this.executionTimeMs.set(response.data.executionTimeMs);
+        this.recordsSorted.set(response.data.totalRecords ?? response.data.size);
+        this.resultData.set(response.data.data);
+      }
     } catch (err) {
       console.error('Execution error:', err);
     } finally {
@@ -164,11 +168,21 @@ export class AlgorithmExplorerComponent implements AfterViewChecked {
 
   // ── Internal ──
 
-  private loadContent(algorithmId: string): void {
+  private async loadContent(algorithmId: string): Promise<void> {
     // Load documentation
-    const markdown = this.mockService.getDocumentation(algorithmId);
-    const html = marked.parse(markdown) as string;
-    this.renderedMarkdown.set(html);
+    try {
+      const response = await firstValueFrom(this.apiService.getAlgorithmDocs(algorithmId));
+      if (response && response.data) {
+        const markdown = response.data.content;
+        const html = marked.parse(markdown) as string;
+        this.renderedMarkdown.set(html);
+      }
+    } catch (err) {
+      console.error('Error loading docs from API, falling back to mock:', err);
+      const markdown = this.mockService.getDocumentation(algorithmId);
+      const html = marked.parse(markdown) as string;
+      this.renderedMarkdown.set(html);
+    }
 
     // Load source code
     const code = this.mockService.getSourceCode(algorithmId);

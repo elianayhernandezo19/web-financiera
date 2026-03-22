@@ -60,6 +60,25 @@ export class ApiService {
       .pipe(catchError(this.handleError));
   }
 
+  /**
+   * Ejecuta un algoritmo en el Laboratorio (Explorador) y trae los datos ordenados
+   */
+  executeAlgorithmLab(algorithm: string, symbol?: string): Observable<ApiResponse<any>> {
+    const body = symbol ? { algorithm, symbol } : { algorithm };
+    return this.http
+      .post<ApiResponse<any>>(`${this.BASE_URL}/sort/execute`, body)
+      .pipe(catchError(this.handleError));
+  }
+
+  /**
+   * Obtiene la documentación Markdown del algoritmo
+   */
+  getAlgorithmDocs(algorithm: string): Observable<ApiResponse<{ algorithm: string; nombre: string; content: string }>> {
+    return this.http
+      .get<ApiResponse<any>>(`${this.BASE_URL}/docs/${algorithm}`)
+      .pipe(catchError(this.handleError));
+  }
+
   /** Convierte errores HTTP en mensajes descriptivos para mostrar en la UI */
   private handleError(error: HttpErrorResponse): Observable<never> {
     const message =
