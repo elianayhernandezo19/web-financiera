@@ -65,25 +65,47 @@ jobs:
           echo "📏 Tamaño del archivo:"
           du -h "$TAR_FILE"
 
-      # ── 5. Test conexión SSH ────────────────────────────────────
+      # ── 5. Diagnóstico de red (falla rápido si no hay conectividad) ──
+      - name: Debug network connectivity
+        timeout-minutes: 1
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🔎 Host  : ${{ vars.VPS_HOST }}"
+          echo "🔎 Puerto: ${{ vars.VPS_PORT }}"
+          echo "🔎 User  : ${{ vars.VPS_USER }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          echo "📡 Probando conectividad TCP..."
+          if timeout 5 bash -c "echo > /dev/tcp/${{ vars.VPS_HOST }}/${{ vars.VPS_PORT }}"; then
+            echo "✅ TCP OK — el puerto responde"
+          else
+            echo "❌ FALLO TCP — no se puede alcanzar ${{ vars.VPS_HOST }}:${{ vars.VPS_PORT }}"
+            echo ""
+            echo "Posibles causas:"
+            echo "  • El VPS está apagado o reiniciando"
+            echo "  • El firewall bloquea el puerto ${{ vars.VPS_PORT }}"
+            echo "  • El host/puerto en las variables del repositorio es incorrecto"
+            exit 1
+          fi
+
+      # ── 6. Test conexión SSH ────────────────────────────────────
       - name: Test SSH connection
+        timeout-minutes: 1
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.VPS_HOST }}
           username: ${{ vars.VPS_USER }}
           port: ${{ vars.VPS_PORT }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 15s
+          request_pty: false
           script: |
-            set -x
-            echo "✅ Conectado al VPS"
-            echo "Hostname:"
-            hostname || echo "❌ hostname falló"
-            echo "Usuario:"
-            whoami || echo "❌ whoami falló"
-            echo "PWD:"
-            pwd
+            echo "✅ SSH OK"
+            echo "Hostname : $(hostname)"
+            echo "Usuario  : $(whoami)"
+            echo "PWD      : $(pwd)"
 
-      # ── 6. Subir TAR ────────────────────────────────────────────
+      # ── 7. Subir TAR ────────────────────────────────────────────
       - name: Upload image tar to VPS (SCP)
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -94,32 +116,38 @@ jobs:
           source: "dist/${{ env.IMAGE_NAME }}_${{ steps.tagger.outputs.tag }}.tar"
           target: "/tmp"
 
-      # ── 7. Verificar archivo en VPS ─────────────────────────────
+      # ── 8. Verificar archivo en VPS ─────────────────────────────
       - name: Verify file on VPS
+        timeout-minutes: 1
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.VPS_HOST }}
           username: ${{ vars.VPS_USER }}
           port: ${{ vars.VPS_PORT }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 10s
+          request_pty: false
           script: |
             echo "📁 Archivos en /tmp:"
             ls -lah /tmp
 
-      # ── 8. Cargar imagen en Docker VPS ──────────────────────────
+      # ── 9. Cargar imagen en Docker VPS ──────────────────────────
       - name: Load image into Docker on VPS
+        timeout-minutes: 5
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.VPS_HOST }}
           username: ${{ vars.VPS_USER }}
           port: ${{ vars.VPS_PORT }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 4m
+          request_pty: false
           envs: IMAGE_NAME
           script: |
             set -e
 
             TAG="${{ steps.tagger.outputs.tag }}"
-            TAR="/tmp/${IMAGE_NAME}_${TAG}.tar"
+            TAR="/tmp/dist/${IMAGE_NAME}_${TAG}.tar"
 
             echo "🔍 Buscando archivo: $TAR"
 
