@@ -18,9 +18,10 @@ export class ApiService {
   // funciones standalone fuera de clases (guards, resolvers funcionales, etc.)
   private readonly http = inject(HttpClient);
 
-  // La URL base puede moverse a src/environments/ para diferenciar
-  // entornos de dev/productoin sin cambiar el código del servicio.
-  private readonly BASE_URL = 'http://localhost:3000/api/v1';
+  // Reads API_URL from window.__env at runtime (injected by docker-entrypoint.sh
+  // via envsubst). Falls back to localhost for local development without Docker.
+  private readonly BASE_URL: string =
+    (window as any).__env?.['API_URL'] || 'http://localhost:3000/api/v1';
 
   /**
    * Ejecuta un algoritmo de ordenamiento sobre los datos financieros del backend.

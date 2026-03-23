@@ -1,0 +1,53 @@
+# =============================================================================
+# docker-compose.yml — AlgoFinance Web Frontend
+#
+# Usage:
+#   Development (backend running on localhost):
+#     docker compose up --build
+#
+#   Custom backend URL:
+#     API_URL=http://api.example.com/api/v1 docker compose up --build
+#
+#   Or create a .env file next to this file:
+#     API_URL=http://api.example.com/api/v1
+# =============================================================================
+
+services:
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Only rebuild the runner stage in subsequent builds (builder is cached)
+      target: runner
+    image: algofinance-web:latest
+    container_name: algofinance-web
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # API_URL is read from the shell or from a .env file.
+      # The default points to localhost; override in production.
+      - API_URL=${API_URL:-http://localhost:3000/api/v1}
+    networks:
+      - algofinance
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/"]
+      interval: 30s
+      timeout:  5s
+      retries:  3
+      start_period: 10s
+
+  # ── Backend (uncomment when the API is also containerised) ──────────────────
+  # backend:
+  #   image: algofinance-api:latest
+  #   container_name: algofinance-api
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - algofinance
+
+networks:
+  algofinance:
+    driver: bridge
