@@ -11,6 +11,8 @@ on:
 
 env:
   IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+  ACTIONS_RUNNER_DEBUG: true
+  ACTIONS_STEP_DEBUG: true
 
 jobs:
   build_and_load:
@@ -18,40 +20,65 @@ jobs:
     environment: AFVA VPS
 
     steps:
-      # ── 1. Checkout del código ────────────────────────────────────────────
+
+      # ── 1. Checkout ─────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ── 2. Determinar tag según rama ──────────────────────────────────────
-      #   main    → latest
-      #   quality → quality
+      # ── 2. Tag por rama ─────────────────────────────────────────
       - name: Decide tag based on branch
         id: tagger
         run: |
           BRANCH="${GITHUB_REF_NAME}"
+          echo "🔎 Branch detectada: $BRANCH"
+
           if [ "$BRANCH" = "main" ]; then
             echo "tag=latest" >> $GITHUB_OUTPUT
           elif [ "$BRANCH" = "quality" ]; then
             echo "tag=quality" >> $GITHUB_OUTPUT
           else
-            echo "Unsupported branch: $BRANCH"
+            echo "❌ Unsupported branch: $BRANCH"
             exit 1
           fi
 
-      # ── 3. Build de la imagen Docker ──────────────────────────────────────
+      # ── 3. Build Docker ─────────────────────────────────────────
       - name: Build Docker image
         run: |
+          echo "🐳 Construyendo imagen..."
           docker build -t "${IMAGE_NAME}:${{ steps.tagger.outputs.tag }}" .
 
-      # ── 4. Exportar imagen como tar ───────────────────────────────────────
+      # ── 4. Guardar como TAR ─────────────────────────────────────
       - name: Save Docker image to tar
         run: |
           mkdir -p dist
-          docker save "${IMAGE_NAME}:${{ steps.tagger.outputs.tag }}" \
-            -o "dist/${IMAGE_NAME}_${{ steps.tagger.outputs.tag }}.tar"
-          chmod 644 "dist/${IMAGE_NAME}_${{ steps.tagger.outputs.tag }}.tar"
 
-      # ── 5. Subir tar a la VPS vía SCP ─────────────────────────────────────
+          TAR_FILE="dist/${IMAGE_NAME}_${{ steps.tagger.outputs.tag }}.tar"
+
+          echo "📦 Guardando imagen en $TAR_FILE"
+          docker save "${IMAGE_NAME}:${{ steps.tagger.outputs.tag }}" -o "$TAR_FILE"
+
+          chmod 644 "$TAR_FILE"
+
+          echo "📁 Archivos en dist:"
+          ls -lah dist
+
+          echo "📏 Tamaño del archivo:"
+          du -h "$TAR_FILE"
+
+      # ── 5. Test conexión SSH ────────────────────────────────────
+      - name: Test SSH connection
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.VPS_HOST }}
+          username: ${{ vars.VPS_USER }}
+          port: ${{ vars.VPS_PORT }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "✅ Conectado al VPS"
+            hostname
+            whoami
+
+      # ── 6. Subir TAR ────────────────────────────────────────────
       - name: Upload image tar to VPS (SCP)
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -62,8 +89,20 @@ jobs:
           source: "dist/${{ env.IMAGE_NAME }}_${{ steps.tagger.outputs.tag }}.tar"
           target: "/tmp"
 
-      # ── 6. Cargar imagen en Docker de la VPS ─────────────────────────────
-      - name: Load image into Docker on VPS (docker load)
+      # ── 7. Verificar archivo en VPS ─────────────────────────────
+      - name: Verify file on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.VPS_HOST }}
+          username: ${{ vars.VPS_USER }}
+          port: ${{ vars.VPS_PORT }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "📁 Archivos en /tmp:"
+            ls -lah /tmp
+
+      # ── 8. Cargar imagen en Docker VPS ──────────────────────────
+      - name: Load image into Docker on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.VPS_HOST }}
@@ -73,19 +112,27 @@ jobs:
           envs: IMAGE_NAME
           script: |
             set -e
+
             TAG="${{ steps.tagger.outputs.tag }}"
-            TAR="/tmp/dist/${IMAGE_NAME}_${TAG}.tar"
+            TAR="/tmp/${IMAGE_NAME}_${TAG}.tar"
+
+            echo "🔍 Buscando archivo: $TAR"
 
             if [ ! -f "$TAR" ]; then
-              echo "❌ Tar no encontrado: $TAR"
+              echo "❌ ERROR: Tar no encontrado"
+              echo "📁 Contenido actual de /tmp:"
+              ls -lah /tmp
               exit 1
             fi
 
-            echo "📦 Cargando imagen desde $TAR ..."
+            echo "📏 Tamaño del archivo:"
+            du -h "$TAR"
+
+            echo "📦 Cargando imagen en Docker..."
             docker load -i "$TAR"
 
-            # Limpiar tar para no llenar el disco
+            echo "🧹 Eliminando archivo..."
             rm -f "$TAR"
 
-            echo "✅ Imagen cargada exitosamente:"
+            echo "✅ Imágenes disponibles:"
             docker images | grep "${IMAGE_NAME}" | head -n 5
