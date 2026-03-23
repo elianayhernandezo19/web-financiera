@@ -1,0 +1,91 @@
+name: Build & Load Docker Image to VPS
+
+on:
+  push:
+    branches: [ "main", "quality" ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.gitignore'
+      - '.env.example'
+
+env:
+  IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+
+jobs:
+  build_and_load:
+    runs-on: ubuntu-latest
+    environment: AFVA VPS
+
+    steps:
+      # ── 1. Checkout del código ────────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── 2. Determinar tag según rama ──────────────────────────────────────
+      #   main    → latest
+      #   quality → quality
+      - name: Decide tag based on branch
+        id: tagger
+        run: |
+          BRANCH="${GITHUB_REF_NAME}"
+          if [ "$BRANCH" = "main" ]; then
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          elif [ "$BRANCH" = "quality" ]; then
+            echo "tag=quality" >> $GITHUB_OUTPUT
+          else
+            echo "Unsupported branch: $BRANCH"
+            exit 1
+          fi
+
+      # ── 3. Build de la imagen Docker ──────────────────────────────────────
+      - name: Build Docker image
+        run: |
+          docker build -t "${IMAGE_NAME}:${{ steps.tagger.outputs.tag }}" .
+
+      # ── 4. Exportar imagen como tar ───────────────────────────────────────
+      - name: Save Docker image to tar
+        run: |
+          mkdir -p dist
+          docker save "${IMAGE_NAME}:${{ steps.tagger.outputs.tag }}" \
+            -o "dist/${IMAGE_NAME}_${{ steps.tagger.outputs.tag }}.tar"
+          chmod 644 "dist/${IMAGE_NAME}_${{ steps.tagger.outputs.tag }}.tar"
+
+      # ── 5. Subir tar a la VPS vía SCP ─────────────────────────────────────
+      - name: Upload image tar to VPS (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ vars.VPS_HOST }}
+          username: ${{ vars.VPS_USER }}
+          port: ${{ vars.VPS_PORT }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "dist/${{ env.IMAGE_NAME }}_${{ steps.tagger.outputs.tag }}.tar"
+          target: "/tmp"
+
+      # ── 6. Cargar imagen en Docker de la VPS ─────────────────────────────
+      - name: Load image into Docker on VPS (docker load)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.VPS_HOST }}
+          username: ${{ vars.VPS_USER }}
+          port: ${{ vars.VPS_PORT }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: IMAGE_NAME
+          script: |
+            set -e
+            TAG="${{ steps.tagger.outputs.tag }}"
+            TAR="/tmp/dist/${IMAGE_NAME}_${TAG}.tar"
+
+            if [ ! -f "$TAR" ]; then
+              echo "❌ Tar no encontrado: $TAR"
+              exit 1
+            fi
+
+            echo "📦 Cargando imagen desde $TAR ..."
+            docker load -i "$TAR"
+
+            # Limpiar tar para no llenar el disco
+            rm -f "$TAR"
+
+            echo "✅ Imagen cargada exitosamente:"
+            docker images | grep "${IMAGE_NAME}" | head -n 5
