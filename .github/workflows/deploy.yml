@@ -74,9 +74,14 @@ jobs:
           port: ${{ vars.VPS_PORT }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            set -x
             echo "✅ Conectado al VPS"
-            hostname
-            whoami
+            echo "Hostname:"
+            hostname || echo "❌ hostname falló"
+            echo "Usuario:"
+            whoami || echo "❌ whoami falló"
+            echo "PWD:"
+            pwd
 
       # ── 6. Subir TAR ────────────────────────────────────────────
       - name: Upload image tar to VPS (SCP)
