@@ -1,8 +1,6 @@
-# =============================================================================
-# Stage 1 — Build
-# Node 22 LTS Alpine: smallest image with npm bundled, no unnecessary packages.
-# =============================================================================
-FROM node:22-alpine AS builder
+// Dockerfile removed — this project deploys static assets to Render or a CDN.
+// Docker artifacts were deprecated and neutralized.
+FROM scratch
 
 WORKDIR /app
 

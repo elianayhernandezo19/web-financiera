@@ -12,6 +12,8 @@
 #     API_URL=http://api.example.com/api/v1
 # =============================================================================
 
+# docker-compose removed - local Docker-based frontend is deprecated. Build
+# static assets with `npm run build` and deploy to Render or a CDN.
 services:
 
   frontend:

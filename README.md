@@ -34,6 +34,19 @@ To build the project run:
 ng build
 ```
 
+## Despliegue en Render (sugerido)
+
+Para desplegar la interfaz en Render como un sitio estático:
+
+1. Añade `render.yaml` (ya incluido en el repo) o crea un Web Service static en Render.
+2. En Render, configura:
+	- Build Command: `npm install && npm run build`
+	- Publish Path / Static Path: `dist/web-visualizador-algoritmos/browser`
+	- Environment Variables (opcional): `API_URL` para apuntar al backend desplegado.
+3. Despliega y valida la URL pública que Render proporciona.
+
+Si prefieres servir la aplicación con un servidor (por ejemplo nginx), crea una build con `npm run build` y sube los archivos estáticos a tu servidor o CDN.
+
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
 ## Running unit tests

@@ -18,8 +18,11 @@ export class ApiService {
   // funciones standalone fuera de clases (guards, resolvers funcionales, etc.)
   private readonly http = inject(HttpClient);
 
-  // Reads API_URL from window.__env at runtime (injected by docker-entrypoint.sh
-  // via envsubst). Falls back to localhost for local development without Docker.
+  // Reads API_URL from window.__env at runtime (injected by some static hosts
+  // that provide runtime config). For Render static sites it's recommended to
+  // set `API_URL` as a build environment variable so it's embedded in the
+  // bundle; this `window.__env` fallback is kept for platforms that support
+  // runtime injection or for local development.
   private readonly BASE_URL: string =
     (window as any).__env?.['API_URL'] || 'http://localhost:3000/api/v1';
 

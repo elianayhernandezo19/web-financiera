@@ -1,0 +1,8 @@
+services:
+  - type: static
+    name: web-financiera
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist/web-visualizador-algoritmos/browser
+    # Do not include secrets here. Set API_URL and other sensitive values in Render dashboard.
