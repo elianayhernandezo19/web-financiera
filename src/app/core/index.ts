@@ -17,6 +17,23 @@ export type {
   SortExecutionResult,
   ApiResponse,
   ExecutionEntry,
+  SimilarityMetric,
+  SimilarityAlgorithmMeta,
+  SimilarityResultItem,
+  SimilarityCompareResponse,
+  PatternParameter,
+  PatternMeta,
+  StreakUpOccurrence,
+  VReversalOccurrence,
+  PatternOccurrence,
+  PatternDetectResponse,
+  RiskCategory,
+  RiskRankingItem,
+  RiskClassificationResponse,
+  CorrelationMatrixResponse,
+  CandleSeries,
+  SmaSeries,
+  CandlesResponse,
 } from './models';
 
 // ── Datos estáticos ──

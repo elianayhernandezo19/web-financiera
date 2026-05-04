@@ -1,0 +1,551 @@
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
+
+// =====================================================================
+//  Patrones y Riesgo (Requerimiento 3)
+//  Reutiliza el lenguaje visual de Similitud (glass + emerald + mono)
+//  e introduce: tabs, tablas, badges de categoria de riesgo.
+// =====================================================================
+
+.patterns-cmd {
+  flex: 1;
+  position: relative;
+
+  // LIGHT MODE
+  background-color: $gray-50;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+  color: $gray-900;
+  padding: 1.25rem 1.5rem 3rem;
+  font-family: $font-sans;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+
+  // DARK MODE
+  :host-context(.dark) & {
+    background-color: $gray-950;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    color: $text-primary;
+  }
+
+  @include md { padding: 1.25rem 2rem 3rem; }
+}
+
+.cmd-container {
+  flex: 1;
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+// ==== Header (mismo lenguaje que Similitud) ===========================
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  &__title {
+    font-size: $text-2xl;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, $brand-400, $brand-300);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  &__subtitle {
+    margin: 0;
+    color: $gray-500;
+    font-size: $text-sm;
+    :host-context(.dark) & { color: $gray-400; }
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.6rem;
+    border-radius: $radius-full;
+    background: rgba($brand-500, 0.1);
+    border: 1px solid rgba($brand-500, 0.25);
+    color: $brand-600;
+    font-family: $font-mono;
+    font-size: $text-xs;
+    width: fit-content;
+    margin-top: 0.4rem;
+    :host-context(.dark) & { color: $brand-400; }
+  }
+}
+
+// ==== Glass panel reutilizable ========================================
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: $radius-xl;
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 1.5rem;
+
+  :host-context(.dark) & {
+    background: rgba(15, 15, 15, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.6);
+  }
+}
+
+.cmd-section-title {
+  font-family: $font-mono;
+  font-size: $text-xs;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: $gray-600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  :host-context(.dark) & { color: $gray-400; }
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $brand-500;
+    box-shadow: 0 0 8px $brand-500;
+  }
+}
+
+// ==== Tabs ============================================================
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  align-items: center;
+
+  &__btn {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    border-radius: $radius-md;
+    border: 1px solid transparent;
+    background: transparent;
+    color: $gray-600;
+    font-family: $font-mono;
+    font-size: $text-xs;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover { background: rgba($brand-500, 0.06); color: $gray-900; }
+
+    &--active {
+      background: rgba($brand-500, 0.12);
+      border-color: rgba($brand-500, 0.35);
+      color: $brand-700;
+    }
+
+    :host-context(.dark) & {
+      color: $gray-400;
+      &:hover { background: rgba($brand-500, 0.1); color: $gray-100; }
+      &--active {
+        background: rgba($brand-500, 0.18);
+        border-color: rgba($brand-400, 0.4);
+        color: $brand-300;
+      }
+    }
+  }
+}
+
+// ==== Control panel + selects + radios + boton ========================
+.control {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto;
+  gap: 1.25rem;
+  align-items: end;
+
+  @media (max-width: 720px) { grid-template-columns: 1fr; }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    label {
+      font-family: $font-mono;
+      font-size: $text-xs;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: $gray-500;
+      :host-context(.dark) & { color: $gray-400; }
+    }
+  }
+
+  &__radios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+
+    label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: $radius-md;
+      cursor: pointer;
+      font-size: $text-sm;
+      font-weight: 500;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: rgba(0, 0, 0, 0.02);
+      color: $gray-700;
+      text-transform: none;
+      letter-spacing: 0;
+      transition: all $transition-fast;
+
+      input { accent-color: $brand-500; }
+      &:hover { border-color: rgba($brand-500, 0.4); }
+
+      :host-context(.dark) & {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.08);
+        color: $gray-200;
+        &:hover { border-color: rgba($brand-400, 0.5); background: rgba($brand-500, 0.06); }
+      }
+    }
+  }
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  padding: 0.65rem 2.2rem 0.65rem 0.85rem;
+  border-radius: $radius-md;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+  color: $gray-900;
+  font-family: $font-mono;
+  font-size: $text-sm;
+  font-weight: 500;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'><path d='M1 1.5l5 5 5-5' stroke='%2310b981' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+
+  // Inputs numericos comparten estetica con select
+  &[type="number"] {
+    background-image: none;
+    padding-right: 0.85rem;
+    cursor: text;
+  }
+
+  &:hover { border-color: rgba($brand-500, 0.35); }
+  &:focus {
+    outline: none;
+    border-color: $brand-500;
+    box-shadow: 0 0 0 3px rgba($brand-500, 0.18);
+  }
+
+  :host-context(.dark) & {
+    background-color: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: $gray-100;
+    &:hover { border-color: rgba($brand-400, 0.5); }
+    &:focus { border-color: $brand-400; box-shadow: 0 0 0 3px rgba($brand-400, 0.2); }
+    option { background-color: #111; color: $gray-100; }
+  }
+}
+
+.btn-primary {
+  padding: 0.7rem 1.4rem;
+  background: linear-gradient(135deg, $brand-600, $brand-500);
+  color: #fff;
+  border: none;
+  border-radius: $radius-md;
+  font-weight: 600;
+  font-size: $text-sm;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px -2px rgba($brand-600, 0.45);
+  transition: transform $transition-fast, box-shadow $transition-fast;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px -2px rgba($brand-600, 0.55);
+  }
+  &:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
+
+  &__spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ==== Error / vacio ==================================================
+.error-banner {
+  border: 1px solid rgba($red-500, 0.4);
+  background: rgba($red-500, 0.08);
+  color: $red-700;
+  font-size: $text-sm;
+  padding: 0.85rem 1rem;
+  border-radius: $radius-md;
+  :host-context(.dark) & { color: $red-400; }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  color: $gray-500;
+  font-size: $text-sm;
+  :host-context(.dark) & { color: $gray-500; }
+}
+
+// ==== Pattern info (definicion formal expandible) ====================
+.pattern-info {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+
+  :host-context(.dark) & { border-top-color: rgba(255, 255, 255, 0.08); }
+
+  &__desc {
+    margin: 0 0 0.5rem 0;
+    color: $gray-600;
+    font-size: $text-sm;
+    :host-context(.dark) & { color: $gray-300; }
+  }
+
+  &__formal {
+    summary {
+      cursor: pointer;
+      color: $brand-600;
+      font-family: $font-mono;
+      font-size: $text-xs;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      user-select: none;
+      padding: 0.35rem 0;
+      :host-context(.dark) & { color: $brand-400; }
+    }
+
+    p { margin: 0.5rem 0; font-size: $text-sm; line-height: 1.5; }
+
+    code {
+      font-family: $font-mono;
+      font-size: $text-xs;
+      background: rgba($brand-500, 0.1);
+      padding: 0.2rem 0.4rem;
+      border-radius: $radius-md;
+      color: $gray-800;
+      :host-context(.dark) & { color: $gray-100; background: rgba($brand-500, 0.15); }
+    }
+  }
+}
+
+// ==== Chart panel (igual que Similitud) ===============================
+.chart-panel {
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.85rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    h2 {
+      font-size: $text-base;
+      font-weight: 600;
+      margin: 0;
+      span { color: $brand-500; font-family: $font-mono; }
+    }
+  }
+
+  &__meta {
+    color: $gray-500;
+    font-size: $text-xs;
+    font-family: $font-mono;
+    :host-context(.dark) & { color: $gray-400; }
+  }
+
+  &__body {
+    height: 320px;
+    @media (max-width: 640px) { height: 240px; }
+  }
+}
+
+// ==== Tabla de datos =================================================
+.table-panel {
+  padding: 0.75rem;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $text-sm;
+
+  thead th {
+    font-family: $font-mono;
+    font-size: $text-xs;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $gray-500;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.02);
+
+    :host-context(.dark) & {
+      color: $gray-400;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom-color: rgba(255, 255, 255, 0.06);
+    }
+  }
+
+  tbody td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    :host-context(.dark) & { border-bottom-color: rgba(255, 255, 255, 0.04); }
+  }
+
+  tbody tr:hover {
+    background: rgba($brand-500, 0.04);
+    :host-context(.dark) & { background: rgba($brand-500, 0.06); }
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+}
+
+.metric-cell {
+  font-family: $font-mono;
+  font-size: $text-xs;
+
+  &--small { color: $gray-500; :host-context(.dark) & { color: $gray-400; } }
+  &--positive { color: $brand-600; font-weight: 600;
+    :host-context(.dark) & { color: $brand-400; } }
+  &--negative { color: $red-500; font-weight: 600;
+    :host-context(.dark) & { color: $red-400; } }
+}
+
+// ==== Risk summary cards =============================================
+.risk-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.risk-card {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: $radius-xl;
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  transition: transform $transition-fast, box-shadow $transition-fast;
+
+  :host-context(.dark) & {
+    background: rgba(15, 15, 15, 0.6);
+    border-color: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(10px);
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
+
+  // barra superior de color por categoria
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  &--conservador::before { background: $brand-500; }
+  &--moderado::before    { background: $amber-500; }
+  &--agresivo::before    { background: $red-500; }
+  &--total::before       { background: $blue-500; }
+
+  &__label {
+    font-family: $font-mono;
+    font-size: $text-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $gray-500;
+    :host-context(.dark) & { color: $gray-400; }
+  }
+
+  &__value {
+    font-family: $font-mono;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    color: $gray-900;
+    letter-spacing: -0.02em;
+    :host-context(.dark) & { color: $gray-100; }
+  }
+
+  &__hint {
+    font-size: $text-xs;
+    color: $gray-500;
+    :host-context(.dark) & { color: $gray-500; }
+  }
+}
+
+// ==== Badges de categoria =============================================
+.badge {
+  display: inline-flex;
+  padding: 0.25rem 0.6rem;
+  border-radius: $radius-full;
+  font-family: $font-mono;
+  font-size: $text-xs;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  &.badge-conservador {
+    background: rgba($brand-500, 0.12);
+    color: $brand-700;
+    border: 1px solid rgba($brand-500, 0.25);
+    :host-context(.dark) & { color: $brand-300; background: rgba($brand-500, 0.18); }
+  }
+
+  &.badge-moderado {
+    background: rgba($amber-500, 0.12);
+    color: #b45309;
+    border: 1px solid rgba($amber-500, 0.3);
+    :host-context(.dark) & { color: $amber-400; background: rgba($amber-500, 0.18); }
+  }
+
+  &.badge-agresivo {
+    background: rgba($red-500, 0.12);
+    color: $red-700;
+    border: 1px solid rgba($red-500, 0.3);
+    :host-context(.dark) & { color: $red-400; background: rgba($red-500, 0.18); }
+  }
+}

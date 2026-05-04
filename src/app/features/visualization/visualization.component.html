@@ -1,0 +1,555 @@
+<!--
+  Visualización - Requerimiento 4.
+  Tres tabs: Matriz de correlacion (heatmap), Velas + SMA, Reporte (PDF).
+  Estilo glass + emerald, sin emojis.
+-->
+<section class="viz-cmd">
+  <div class="cmd-container">
+
+    <!-- ============ Header ============ -->
+    <header class="section-header no-print">
+      <h1 class="section-header__title">Visualizacion bursatil</h1>
+      <p class="section-header__subtitle">
+        Matriz de correlacion en mapa de calor, grafico de velas con medias
+        moviles, y reporte tecnico exportable a PDF.
+      </p>
+      <span class="section-header__tag">REQ.04 / HEATMAP + CANDLESTICK + PDF</span>
+    </header>
+
+    <!-- ============ Tabs ============ -->
+    <nav class="tabs glass-panel no-print" role="tablist">
+      <button class="tabs__btn"
+              [class.tabs__btn--active]="activeTab() === 'heatmap'"
+              (click)="activeTab.set('heatmap')">
+        Matriz de correlacion
+      </button>
+      <button class="tabs__btn"
+              [class.tabs__btn--active]="activeTab() === 'candles'"
+              (click)="activeTab.set('candles')">
+        Velas y medias moviles
+      </button>
+      <button class="tabs__btn"
+              [class.tabs__btn--active]="activeTab() === 'report'"
+              (click)="activeTab.set('report')">
+        Reporte / Exportar PDF
+      </button>
+    </nav>
+
+    <!-- ====================================================== -->
+    <!--   TAB 1 - HEATMAP                                       -->
+    <!-- ====================================================== -->
+    @if (activeTab() === 'heatmap') {
+
+      <div class="glass-panel no-print">
+        <h2 class="cmd-section-title">Seleccion de activos</h2>
+
+        <div class="control">
+          <div class="control__field">
+            <label for="addSym">Agregar activo</label>
+            <select id="addSym" class="select"
+                    [ngModel]="symbolToAdd()"
+                    (ngModelChange)="symbolToAdd.set($event)">
+              @for (s of availableSymbols(); track s) { <option [value]="s">{{ s }}</option> }
+            </select>
+          </div>
+
+          <div class="control__field">
+            <label>Metrica</label>
+            <div class="control__radios">
+              <label>
+                <input type="radio" name="hMetric" value="close"
+                       [checked]="heatmapMetric()==='close'"
+                       (change)="heatmapMetric.set('close')">
+                Precios
+              </label>
+              <label>
+                <input type="radio" name="hMetric" value="returns"
+                       [checked]="heatmapMetric()==='returns'"
+                       (change)="heatmapMetric.set('returns')">
+                Rendimientos
+              </label>
+            </div>
+          </div>
+
+          <button class="btn-secondary" (click)="agregarSymbol()">Agregar</button>
+
+          <button class="btn-primary" (click)="calcularMatriz()" [disabled]="heatmapLoading()">
+            @if (heatmapLoading()) {
+              <span class="btn-primary__spinner"></span> Calculando...
+            } @else {
+              Calcular matriz
+            }
+          </button>
+        </div>
+
+        <!-- Chips de simbolos seleccionados -->
+        <div class="chips">
+          @for (s of selectedSymbols(); track trackSymbol($index, s)) {
+            <span class="chip">
+              {{ s }}
+              <button class="chip__close" (click)="quitarSymbol(s)" aria-label="Quitar">x</button>
+            </span>
+          }
+          @if (selectedSymbols().length === 0) {
+            <span class="chips__empty">Aun no hay activos seleccionados.</span>
+          }
+        </div>
+
+        <p class="hint">
+          Tip: prueba con ETFs grandes (VOO, SPY, QQQ, GLD) para ver
+          correlaciones cercanas a 1 entre los del SP 500 y bajas frente al oro.
+        </p>
+      </div>
+
+      @if (heatmapError()) {
+        <div class="error-banner no-print">{{ heatmapError() }}</div>
+      }
+
+      @if (heatmapResult(); as h) {
+        <!-- HEATMAP -->
+        <div class="glass-panel">
+          <header class="chart-panel__head">
+            <h2>Mapa de calor de correlaciones</h2>
+            <span class="chart-panel__meta">
+              n = {{ h.n }} pts | metrica = {{ h.metric === 'close' ? 'precios' : 'retornos' }}
+              | rango {{ h.dateRange.from }} hasta {{ h.dateRange.to }}
+            </span>
+          </header>
+
+          <div class="heatmap-wrap">
+            <table class="heatmap">
+              <thead>
+                <tr>
+                  <th class="heatmap__corner"></th>
+                  @for (col of h.labels; track col) {
+                    <th class="heatmap__col-label">{{ col }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of h.labels; track row; let i = $index) {
+                  <tr>
+                    <th class="heatmap__row-label">{{ row }}</th>
+                    @for (col of h.labels; track col; let j = $index) {
+                      <td class="heatmap__cell"
+                          [style.background]="cellColor(h.matrix[i][j])"
+                          [style.color]="cellTextColor(h.matrix[i][j])"
+                          [title]="row + ' vs ' + col + ' = ' + (h.matrix[i][j] | number:'1.4-4')">
+                        {{ h.matrix[i][j] | number:'1.2-2' }}
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Leyenda -->
+          <div class="heatmap-legend">
+            <div class="heatmap-legend__bar"></div>
+            <div class="heatmap-legend__labels">
+              <span>-1 (inversa)</span>
+              <span>0 (sin relacion)</span>
+              <span>+1 (perfecta)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Explicacion didactica -->
+        <div class="glass-panel info-card">
+          <h3 class="info-card__title">Como leer la matriz</h3>
+          <ul class="info-card__list">
+            <li>
+              <strong>Diagonal = 1</strong>: cada activo se correlaciona perfectamente
+              consigo mismo. Es la sanidad de la matriz.
+            </li>
+            <li>
+              <strong>Verde</strong>: correlacion positiva (suben/bajan juntos).
+              Mas oscuro = mas fuerte. Util para detectar redundancia.
+            </li>
+            <li>
+              <strong>Rojo</strong>: correlacion negativa (cuando uno sube el otro baja).
+              Util para diversificar (ej. acciones y oro).
+            </li>
+            <li>
+              <strong>Cerca de 0</strong>: no hay relacion lineal. Diversificacion sin
+              compromiso direccional.
+            </li>
+          </ul>
+        </div>
+      }
+
+    }
+
+    <!-- ====================================================== -->
+    <!--   TAB 2 - CANDLES + SMA                                 -->
+    <!-- ====================================================== -->
+    @if (activeTab() === 'candles') {
+
+      <div class="glass-panel no-print">
+        <h2 class="cmd-section-title">Parametros del grafico</h2>
+
+        <div class="control">
+          <div class="control__field">
+            <label for="cSym">Activo</label>
+            <select id="cSym" class="select"
+                    [ngModel]="candleSymbol()"
+                    (ngModelChange)="candleSymbol.set($event)">
+              @for (s of availableSymbols(); track s) { <option [value]="s">{{ s }}</option> }
+            </select>
+          </div>
+
+          <div class="control__field">
+            <label for="cLim">Cantidad de velas</label>
+            <input id="cLim" type="number" min="20" max="500" class="select"
+                   [ngModel]="candleLimit()"
+                   (ngModelChange)="candleLimit.set($event)">
+          </div>
+
+          <div class="control__field">
+            <label for="cSma">Ventanas SMA (separadas por coma)</label>
+            <input id="cSma" type="text" class="select"
+                   placeholder="20,50,200"
+                   [ngModel]="candleSMAs()"
+                   (ngModelChange)="candleSMAs.set($event)">
+          </div>
+
+          <button class="btn-primary" (click)="cargarVelas()" [disabled]="candleLoading()">
+            @if (candleLoading()) {
+              <span class="btn-primary__spinner"></span> Cargando...
+            } @else {
+              Generar grafico
+            }
+          </button>
+        </div>
+      </div>
+
+      @if (candleError()) {
+        <div class="error-banner no-print">{{ candleError() }}</div>
+      }
+
+      @if (candleResult(); as r) {
+        <div class="glass-panel">
+          <header class="chart-panel__head">
+            <h2><span>{{ r.symbol }}</span> - velas y medias moviles</h2>
+            <span class="chart-panel__meta">
+              n = {{ r.n }} velas | rango {{ r.dateRange.from }} hasta {{ r.dateRange.to }}
+              | tiempo = {{ r.executionTimeMs | number:'1.2-2' }} ms
+            </span>
+          </header>
+
+          <!-- SVG de velas japonesas + panel de volumen -->
+          @if (candleGeometry(); as g) {
+            <div class="svg-wrap">
+              <svg [attr.viewBox]="'0 0 ' + g.W + ' ' + g.H"
+                   class="candle-svg"
+                   xmlns="http://www.w3.org/2000/svg"
+                   preserveAspectRatio="xMidYMid meet">
+
+                <!-- Fondo del panel de precios -->
+                <rect [attr.x]="g.PAD.left" [attr.y]="g.priceTop"
+                      [attr.width]="g.W - g.PAD.left - g.PAD.right"
+                      [attr.height]="g.priceHeight"
+                      class="panel-bg"></rect>
+                <!-- Fondo del panel de volumen -->
+                <rect [attr.x]="g.PAD.left" [attr.y]="g.volTop"
+                      [attr.width]="g.W - g.PAD.left - g.PAD.right"
+                      [attr.height]="g.volHeight"
+                      class="panel-bg"></rect>
+
+                <!-- Grilla horizontal del panel de precios + labels eje Y -->
+                @for (t of g.yTicks; track t.y) {
+                  <line [attr.x1]="g.PAD.left" [attr.x2]="g.W - g.PAD.right"
+                        [attr.y1]="t.y" [attr.y2]="t.y"
+                        class="grid-line"></line>
+                  <text [attr.x]="g.PAD.left - 8" [attr.y]="t.y + 4"
+                        text-anchor="end" class="axis-label">
+                    {{ t.v | number:'1.2-2' }}
+                  </text>
+                  <text [attr.x]="g.W - g.PAD.right + 8" [attr.y]="t.y + 4"
+                        text-anchor="start" class="axis-label">
+                    {{ t.v | number:'1.2-2' }}
+                  </text>
+                }
+
+                <!-- Etiqueta "VOL" -->
+                <text [attr.x]="g.PAD.left - 8" [attr.y]="g.volTop + 12"
+                      text-anchor="end" class="axis-label axis-label--bold">VOL</text>
+
+                <!-- Etiquetas del eje Y del volumen -->
+                @for (t of g.volTicks; track t.y) {
+                  <text [attr.x]="g.W - g.PAD.right + 8" [attr.y]="t.y + 4"
+                        text-anchor="start" class="axis-label axis-label--small">
+                    {{ formatVolume(t.v) }}
+                  </text>
+                }
+
+                <!-- Labels del eje X (fechas) -->
+                @for (t of g.xTicks; track t.x) {
+                  <line [attr.x1]="t.x" [attr.x2]="t.x"
+                        [attr.y1]="g.volTop + g.volHeight"
+                        [attr.y2]="g.volTop + g.volHeight + 4"
+                        class="grid-line"></line>
+                  <text [attr.x]="t.x" [attr.y]="g.H - 12"
+                        text-anchor="middle" class="axis-label">
+                    {{ t.label }}
+                  </text>
+                }
+
+                <!-- Volumen (debajo) -->
+                @for (b of g.volBars; track trackCandle($index)) {
+                  <rect [attr.x]="b.x" [attr.y]="b.y"
+                        [attr.width]="b.w" [attr.height]="b.h"
+                        [attr.class]="b.isUp ? 'vol-bar vol-bar--up' : 'vol-bar vol-bar--down'">
+                  </rect>
+                }
+
+                <!-- Velas japonesas -->
+                @for (c of g.candles; track trackCandle($index)) {
+                  <g [attr.class]="c.isUp ? 'candle candle--up' : 'candle candle--down'">
+                    <line [attr.x1]="c.x" [attr.x2]="c.x"
+                          [attr.y1]="c.yHigh" [attr.y2]="c.yLow"
+                          class="candle__wick"></line>
+                    <rect [attr.x]="c.rectX" [attr.y]="c.rectY"
+                          [attr.width]="c.rectW" [attr.height]="c.rectH"
+                          class="candle__body">
+                      <title>{{ c.date }}: O={{ c.open | number:'1.2-2' }} H={{ c.high | number:'1.2-2' }} L={{ c.low | number:'1.2-2' }} C={{ c.close | number:'1.2-2' }}</title>
+                    </rect>
+                  </g>
+                }
+
+                <!-- SMAs (lineas suaves sobre velas) -->
+                @for (sma of g.smaPaths; track sma.window) {
+                  <path [attr.d]="sma.d" [attr.stroke]="sma.color"
+                        fill="none" stroke-width="2"
+                        class="sma-line"></path>
+                }
+              </svg>
+            </div>
+
+            <!-- Leyenda de SMAs -->
+            <div class="sma-legend">
+              @for (sma of g.smaPaths; track sma.window) {
+                <span class="sma-legend__item">
+                  <span class="sma-legend__swatch" [style.background]="sma.color"></span>
+                  SMA({{ sma.window }})
+                </span>
+              }
+              <span class="sma-legend__item">
+                <span class="sma-legend__swatch sma-legend__swatch--up"></span>
+                Vela alcista (cierre &gt; apertura)
+              </span>
+              <span class="sma-legend__item">
+                <span class="sma-legend__swatch sma-legend__swatch--down"></span>
+                Vela bajista (cierre &lt; apertura)
+              </span>
+            </div>
+          }
+        </div>
+
+        <!-- Explicacion didactica -->
+        <div class="glass-panel info-card">
+          <h3 class="info-card__title">Como leer este grafico</h3>
+          <ul class="info-card__list">
+            <li>
+              Cada <strong>vela</strong> resume un dia de cotizacion: la linea fina
+              muestra el rango (high-low) y el rectangulo el cuerpo (open-close).
+            </li>
+            <li>
+              <strong>Verde</strong>: el cierre supero a la apertura (dia alcista).
+              <strong>Rojo</strong>: el cierre fue inferior (dia bajista).
+            </li>
+            <li>
+              Las <strong>SMA</strong> (medias moviles) suavizan el ruido. Una SMA
+              corta (20) reacciona rapido; una larga (200) muestra la tendencia
+              estructural.
+            </li>
+            <li>
+              Cuando una SMA corta cruza por encima de una larga se llama
+              "<em>golden cross</em>" (senal alcista clasica). El cruce inverso
+              es "<em>death cross</em>".
+            </li>
+          </ul>
+        </div>
+      }
+    }
+
+    <!-- ====================================================== -->
+    <!--   TAB 3 - REPORTE / EXPORT PDF                          -->
+    <!-- ====================================================== -->
+    @if (activeTab() === 'report') {
+
+      <div class="glass-panel no-print">
+        <h2 class="cmd-section-title">Reporte tecnico</h2>
+        <p class="hint">
+          Este reporte consolida los analisis visuales y numericos generados
+          en las dos pestanas anteriores. Pulsa "Exportar PDF" y elige
+          "Guardar como PDF" en el dialogo del navegador.
+        </p>
+        <button class="btn-primary" (click)="exportarPDF()">Exportar PDF</button>
+      </div>
+
+      <!-- Contenido para imprimir -->
+      <div class="print-area">
+        <header class="print-header">
+          <h1>Reporte de Analisis Bursatil</h1>
+          <p class="print-meta">
+            Universidad del Quindio &middot; Analisis de Algoritmos
+            &middot; Generado: {{ heatmapResult()?.dateRange?.to || candleResult()?.dateRange?.to || '-' }}
+          </p>
+        </header>
+
+        <!-- Seccion matriz -->
+        @if (heatmapResult(); as h) {
+          <section class="print-section">
+            <h2>1. Matriz de correlacion</h2>
+            <p>
+              Activos analizados: <strong>{{ h.labels.join(', ') }}</strong>.<br>
+              Metrica: {{ h.metric === 'close' ? 'Precios de cierre' : 'Rendimientos diarios' }}.<br>
+              Periodo: {{ h.dateRange.from }} hasta {{ h.dateRange.to }} ({{ h.n }} puntos).<br>
+              Pares calculados: {{ h.pairsComputed }}.
+            </p>
+            <table class="heatmap heatmap--print">
+              <thead>
+                <tr>
+                  <th class="heatmap__corner"></th>
+                  @for (col of h.labels; track col) {
+                    <th class="heatmap__col-label">{{ col }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of h.labels; track row; let i = $index) {
+                  <tr>
+                    <th class="heatmap__row-label">{{ row }}</th>
+                    @for (col of h.labels; track col; let j = $index) {
+                      <td class="heatmap__cell"
+                          [style.background]="cellColor(h.matrix[i][j])"
+                          [style.color]="cellTextColor(h.matrix[i][j])">
+                        {{ h.matrix[i][j] | number:'1.2-2' }}
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            <h3>Resumen de pares</h3>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Activo A</th>
+                  <th>Activo B</th>
+                  <th>r (Pearson)</th>
+                  <th>Categoria</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of h.labels; track row; let i = $index) {
+                  @for (col of h.labels; track col; let j = $index) {
+                    @if (j > i) {
+                      <tr>
+                        <td>{{ row }}</td>
+                        <td>{{ col }}</td>
+                        <td>{{ h.matrix[i][j] | number:'1.4-4' }}</td>
+                        <td>{{ classifyCorrelation(h.matrix[i][j]) }}</td>
+                      </tr>
+                    }
+                  }
+                }
+              </tbody>
+            </table>
+          </section>
+        } @else {
+          <p class="print-section">
+            <em>No se ha generado matriz de correlacion. Ve a la pestana
+            "Matriz de correlacion", calcula los datos y vuelve aqui.</em>
+          </p>
+        }
+
+        <!-- Seccion velas -->
+        @if (candleResult(); as r) {
+          <section class="print-section">
+            <h2>2. Velas con medias moviles</h2>
+            <p>
+              Activo: <strong>{{ r.symbol }}</strong>.<br>
+              Velas: {{ r.n }} ({{ r.dateRange.from }} hasta {{ r.dateRange.to }}).<br>
+              Medias moviles calculadas: {{ r.smas.length }}
+              (ventanas: <strong>{{ smaWindowsLabel(r.smas) }}</strong>).
+            </p>
+
+            @if (candleGeometry(); as g) {
+              <div class="svg-wrap">
+                <svg [attr.viewBox]="'0 0 ' + g.W + ' ' + g.H"
+                     class="candle-svg" xmlns="http://www.w3.org/2000/svg"
+                     preserveAspectRatio="xMidYMid meet">
+                  @for (t of g.yTicks; track t.y) {
+                    <line [attr.x1]="g.PAD.left" [attr.x2]="g.W - g.PAD.right"
+                          [attr.y1]="t.y" [attr.y2]="t.y" class="grid-line"></line>
+                    <text [attr.x]="g.PAD.left - 8" [attr.y]="t.y + 4"
+                          text-anchor="end" class="axis-label">
+                      {{ t.v | number:'1.2-2' }}
+                    </text>
+                  }
+                  @for (t of g.xTicks; track t.x) {
+                    <text [attr.x]="t.x" [attr.y]="g.H - 8"
+                          text-anchor="middle" class="axis-label">{{ t.label }}</text>
+                  }
+                  @for (c of g.candles; track trackCandle($index)) {
+                    <g [attr.class]="c.isUp ? 'candle candle--up' : 'candle candle--down'">
+                      <line [attr.x1]="c.x" [attr.x2]="c.x"
+                            [attr.y1]="c.yHigh" [attr.y2]="c.yLow"
+                            class="candle__wick"></line>
+                      <rect [attr.x]="c.rectX" [attr.y]="c.rectY"
+                            [attr.width]="c.rectW" [attr.height]="c.rectH"
+                            class="candle__body"></rect>
+                    </g>
+                  }
+                  @for (sma of g.smaPaths; track sma.window) {
+                    <path [attr.d]="sma.d" [attr.stroke]="sma.color"
+                          fill="none" stroke-width="2"></path>
+                  }
+                </svg>
+              </div>
+            }
+
+            <h3>Resumen del periodo</h3>
+            <table class="data-table">
+              <tbody>
+                <tr>
+                  <th>Apertura inicial ({{ r.candles.dates[0] }})</th>
+                  <td>{{ r.candles.opens[0] | number:'1.2-4' }}</td>
+                </tr>
+                <tr>
+                  <th>Cierre final ({{ r.candles.dates[r.candles.dates.length - 1] }})</th>
+                  <td>{{ r.candles.closes[r.candles.closes.length - 1] | number:'1.2-4' }}</td>
+                </tr>
+                <tr><th>Variacion total</th>
+                  <td>
+                    {{ ((r.candles.closes[r.candles.closes.length - 1] - r.candles.opens[0])
+                       / r.candles.opens[0] * 100) | number:'1.2-2' }}%
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+        } @else {
+          <p class="print-section">
+            <em>No se ha generado grafico de velas. Ve a la pestana
+            "Velas y medias moviles", calcula los datos y vuelve aqui.</em>
+          </p>
+        }
+
+        <footer class="print-footer">
+          <p>
+            Documento generado por la aplicacion AlgoFinance UQ.
+            Algoritmos implementados desde cero (sin librerias de alto nivel)
+            cumpliendo el reglamento del proyecto Analisis de Algoritmos.
+          </p>
+        </footer>
+      </div>
+
+    }
+
+  </div>
+</section>

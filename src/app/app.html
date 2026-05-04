@@ -42,6 +42,24 @@
 
       <!-- Acciones de Navegación y Toggle -->
       <div class="navbar__right">
+        <a routerLink="/similarity" class="nav-btn" aria-label="Similitud de series">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8M14 7h7v7"/>
+          </svg>
+          <span class="nav-btn__text">Similitud</span>
+        </a>
+        <a routerLink="/patterns" class="nav-btn" aria-label="Patrones y riesgo">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h3l3-9 6 18 3-9h3"/>
+          </svg>
+          <span class="nav-btn__text">Patrones</span>
+        </a>
+        <a routerLink="/visualization" class="nav-btn" aria-label="Visualizacion bursatil">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v16h16M8 14V8m4 6V4m4 10v-3"/>
+          </svg>
+          <span class="nav-btn__text">Visualizacion</span>
+        </a>
         @if (isAlgorithmsRoute()) {
           <a routerLink="/" class="nav-btn" aria-label="Ir al Dashboard">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 18px; height: 18px;">

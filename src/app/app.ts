@@ -18,7 +18,7 @@ export class App {
   private router = inject(Router);
 
   /** Autores del proyecto — se renderizan como badges en el Navbar */
-  readonly authors = ['Juan David', 'Eliana Yiset', 'Andrés Felipe'] as const;
+  readonly authors = ['Juan David', 'Eliana Yiset'] as const;
 
   /** Signal reacitvo a la ruta actual para intercambiar el botón del header */
   readonly isAlgorithmsRoute = toSignal(

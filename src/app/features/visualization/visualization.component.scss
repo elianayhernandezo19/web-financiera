@@ -1,0 +1,661 @@
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
+
+// =====================================================================
+//  Visualizacion (Requerimiento 4)
+//  Reutiliza el lenguaje visual de Similitud / Patrones e introduce:
+//    - Heatmap (matriz de correlacion como tabla coloreada)
+//    - Candlestick SVG (rectangulos open-close + linea high-low)
+//    - Print stylesheet para exportacion a PDF
+// =====================================================================
+
+.viz-cmd {
+  flex: 1;
+  position: relative;
+
+  background-color: $gray-50;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+  color: $gray-900;
+  padding: 1.25rem 1.5rem 3rem;
+  font-family: $font-sans;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+
+  :host-context(.dark) & {
+    background-color: $gray-950;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    color: $text-primary;
+  }
+
+  @include md { padding: 1.25rem 2rem 3rem; }
+}
+
+.cmd-container {
+  flex: 1;
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+// ==== Header ============================================================
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  &__title {
+    font-size: $text-2xl;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, $brand-400, $brand-300);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  &__subtitle { margin: 0; color: $gray-500; font-size: $text-sm;
+    :host-context(.dark) & { color: $gray-400; } }
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.6rem;
+    border-radius: $radius-full;
+    background: rgba($brand-500, 0.1);
+    border: 1px solid rgba($brand-500, 0.25);
+    color: $brand-600;
+    font-family: $font-mono;
+    font-size: $text-xs;
+    width: fit-content;
+    margin-top: 0.4rem;
+    :host-context(.dark) & { color: $brand-400; }
+  }
+}
+
+// ==== Glass + section title (igual que Patrones) =======================
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: $radius-xl;
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 1.5rem;
+
+  :host-context(.dark) & {
+    background: rgba(15, 15, 15, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.6);
+  }
+}
+
+.cmd-section-title {
+  font-family: $font-mono;
+  font-size: $text-xs;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: $gray-600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  :host-context(.dark) & { color: $gray-400; }
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $brand-500;
+    box-shadow: 0 0 8px $brand-500;
+  }
+}
+
+// ==== Tabs ==============================================================
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+
+  &__btn {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    border-radius: $radius-md;
+    border: 1px solid transparent;
+    background: transparent;
+    color: $gray-600;
+    font-family: $font-mono;
+    font-size: $text-xs;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all $transition-fast;
+    &:hover { background: rgba($brand-500, 0.06); color: $gray-900; }
+    &--active {
+      background: rgba($brand-500, 0.12);
+      border-color: rgba($brand-500, 0.35);
+      color: $brand-700;
+    }
+    :host-context(.dark) & {
+      color: $gray-400;
+      &:hover { background: rgba($brand-500, 0.1); color: $gray-100; }
+      &--active {
+        background: rgba($brand-500, 0.18);
+        border-color: rgba($brand-400, 0.4);
+        color: $brand-300;
+      }
+    }
+  }
+}
+
+// ==== Controles + selects + radios + botones ============================
+.control {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto;
+  gap: 1.25rem;
+  align-items: end;
+  @media (max-width: 720px) { grid-template-columns: 1fr; }
+
+  &__field {
+    display: flex; flex-direction: column; gap: 0.4rem;
+    label {
+      font-family: $font-mono;
+      font-size: $text-xs;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: $gray-500;
+      :host-context(.dark) & { color: $gray-400; }
+    }
+  }
+
+  &__radios {
+    display: flex; flex-wrap: wrap; gap: 0.6rem;
+    label {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: $radius-md; cursor: pointer;
+      font-size: $text-sm; font-weight: 500;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: rgba(0, 0, 0, 0.02);
+      color: $gray-700; text-transform: none; letter-spacing: 0;
+      transition: all $transition-fast;
+      input { accent-color: $brand-500; }
+      &:hover { border-color: rgba($brand-500, 0.4); }
+      :host-context(.dark) & {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.08);
+        color: $gray-200;
+        &:hover { border-color: rgba($brand-400, 0.5); background: rgba($brand-500, 0.06); }
+      }
+    }
+  }
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  padding: 0.65rem 2.2rem 0.65rem 0.85rem;
+  border-radius: $radius-md;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+  color: $gray-900;
+  font-family: $font-mono;
+  font-size: $text-sm;
+  font-weight: 500;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'><path d='M1 1.5l5 5 5-5' stroke='%2310b981' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+
+  &[type="number"], &[type="text"] {
+    background-image: none;
+    padding-right: 0.85rem;
+    cursor: text;
+  }
+
+  &:hover { border-color: rgba($brand-500, 0.35); }
+  &:focus {
+    outline: none;
+    border-color: $brand-500;
+    box-shadow: 0 0 0 3px rgba($brand-500, 0.18);
+  }
+
+  :host-context(.dark) & {
+    background-color: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: $gray-100;
+    &:hover { border-color: rgba($brand-400, 0.5); }
+    &:focus { border-color: $brand-400; box-shadow: 0 0 0 3px rgba($brand-400, 0.2); }
+    option { background-color: #111; color: $gray-100; }
+  }
+}
+
+.btn-primary {
+  padding: 0.7rem 1.4rem;
+  background: linear-gradient(135deg, $brand-600, $brand-500);
+  color: #fff; border: none;
+  border-radius: $radius-md;
+  font-weight: 600; font-size: $text-sm;
+  letter-spacing: 0.02em; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  box-shadow: 0 4px 12px -2px rgba($brand-600, 0.45);
+  transition: transform $transition-fast, box-shadow $transition-fast;
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px -2px rgba($brand-600, 0.55);
+  }
+  &:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
+  &__spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.btn-secondary {
+  padding: 0.7rem 1.2rem;
+  background: transparent;
+  border: 1px solid rgba($brand-500, 0.4);
+  color: $brand-700;
+  border-radius: $radius-md;
+  font-weight: 600; font-size: $text-sm;
+  cursor: pointer;
+  transition: all $transition-fast;
+  &:hover { background: rgba($brand-500, 0.08); }
+  :host-context(.dark) & { color: $brand-400; border-color: rgba($brand-400, 0.4); }
+}
+
+.error-banner {
+  border: 1px solid rgba($red-500, 0.4);
+  background: rgba($red-500, 0.08);
+  color: $red-700;
+  font-size: $text-sm;
+  padding: 0.85rem 1rem;
+  border-radius: $radius-md;
+  :host-context(.dark) & { color: $red-400; }
+}
+
+.hint {
+  margin: 0.5rem 0 0;
+  color: $gray-500;
+  font-size: $text-xs;
+  font-style: italic;
+  :host-context(.dark) & { color: $gray-400; }
+}
+
+// ==== Chips de simbolos =================================================
+.chips {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  margin-top: 1rem;
+
+  &__empty {
+    color: $gray-500;
+    font-size: $text-sm;
+    font-style: italic;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  background: rgba($brand-500, 0.12);
+  border: 1px solid rgba($brand-500, 0.3);
+  color: $brand-700;
+  border-radius: $radius-full;
+  font-family: $font-mono;
+  font-size: $text-xs;
+  font-weight: 600;
+
+  :host-context(.dark) & {
+    color: $brand-300;
+    background: rgba($brand-500, 0.18);
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0.6;
+    &:hover { opacity: 1; }
+  }
+}
+
+// ==== Heatmap (matriz coloreada) ========================================
+.chart-panel__head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;
+  h2 { font-size: $text-base; font-weight: 600; margin: 0;
+       span { color: $brand-500; font-family: $font-mono; } }
+}
+.chart-panel__meta {
+  color: $gray-500;
+  font-size: $text-xs;
+  font-family: $font-mono;
+  :host-context(.dark) & { color: $gray-400; }
+}
+
+.heatmap-wrap {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.heatmap {
+  border-collapse: collapse;
+  margin: 0 auto;
+  font-family: $font-mono;
+  font-size: $text-xs;
+
+  th, td {
+    padding: 0.5rem 0.65rem;
+    text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    :host-context(.dark) & { border-color: rgba(255, 255, 255, 0.05); }
+  }
+
+  &__corner { background: transparent; }
+
+  &__col-label, &__row-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $gray-700;
+    background: rgba(0, 0, 0, 0.03);
+    :host-context(.dark) & { color: $gray-200; background: rgba(255, 255, 255, 0.03); }
+  }
+
+  &__cell {
+    min-width: 60px;
+    font-weight: 600;
+    transition: filter $transition-fast;
+    cursor: default;
+    &:hover { filter: brightness(1.15); }
+  }
+}
+
+.heatmap-legend {
+  margin: 0.5rem auto 0;
+  max-width: 480px;
+
+  &__bar {
+    height: 12px;
+    border-radius: $radius-md;
+    background: linear-gradient(90deg, #ef4444 0%, transparent 50%, #10b981 100%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    :host-context(.dark) & { border-color: rgba(255, 255, 255, 0.1); }
+  }
+  &__labels {
+    margin-top: 0.4rem;
+    display: flex;
+    justify-content: space-between;
+    font-size: $text-xs;
+    font-family: $font-mono;
+    color: $gray-500;
+    :host-context(.dark) & { color: $gray-400; }
+  }
+}
+
+// ==== Candlestick SVG ==================================================
+.svg-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.candle-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+
+  .grid-line {
+    stroke: rgba(0, 0, 0, 0.06);
+    stroke-dasharray: 3 3;
+    :host-context(.dark) & { stroke: rgba(255, 255, 255, 0.06); }
+  }
+
+  .axis-label {
+    font-family: $font-mono;
+    font-size: 11px;
+    fill: $gray-500;
+    &--bold  { font-weight: 700; }
+    &--small { font-size: 9px; }
+    :host-context(.dark) & { fill: $gray-400; }
+  }
+
+  // Fondo del panel de precios y de volumen (sutil)
+  .panel-bg {
+    fill: rgba(0, 0, 0, 0.015);
+    :host-context(.dark) & { fill: rgba(255, 255, 255, 0.015); }
+  }
+
+  // Velas japonesas verticales: cuerpo (rect) + mecha (line)
+  .candle {
+    &__wick {
+      stroke-width: 1;
+      stroke-linecap: butt;
+    }
+    &__body {
+      stroke-width: 1;
+      shape-rendering: crispEdges;
+    }
+
+    // Vela alcista (close > open) - verde
+    &--up .candle__body {
+      fill:   #10b981;
+      stroke: #047857;
+    }
+    &--up .candle__wick { stroke: #047857; }
+
+    // Vela bajista (close < open) - roja
+    &--down .candle__body {
+      fill:   #ef4444;
+      stroke: #b91c1c;
+    }
+    &--down .candle__wick { stroke: #b91c1c; }
+  }
+
+  // Barras de volumen (debajo del panel de precios)
+  .vol-bar {
+    shape-rendering: crispEdges;
+    &--up   { fill: rgba(16,  185, 129, 0.5); }
+    &--down { fill: rgba(239,  68,  68, 0.5); }
+  }
+
+  .sma-line {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.sma-legend {
+  display: flex; flex-wrap: wrap; gap: 1rem;
+  margin-top: 0.75rem;
+  font-size: $text-xs;
+  font-family: $font-mono;
+  color: $gray-600;
+  :host-context(.dark) & { color: $gray-400; }
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  &__swatch {
+    display: inline-block;
+    width: 14px;
+    height: 4px;
+    border-radius: 2px;
+
+    &--up   { background: #10b981; height: 8px; }
+    &--down { background: $red-500; height: 8px; }
+  }
+}
+
+// ==== Info card didactica ==============================================
+.info-card {
+  &__title {
+    font-size: $text-base;
+    font-weight: 600;
+    margin: 0 0 0.75rem 0;
+    color: $brand-600;
+    :host-context(.dark) & { color: $brand-400; }
+  }
+  &__list {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: $gray-700;
+    font-size: $text-sm;
+    line-height: 1.6;
+    :host-context(.dark) & { color: $gray-300; }
+    li { margin-bottom: 0.5rem; }
+  }
+}
+
+// ==== Tabla generica (reporte) =========================================
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $text-sm;
+  margin-top: 0.75rem;
+
+  thead th {
+    font-family: $font-mono;
+    font-size: $text-xs;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $gray-500;
+    text-align: left;
+    padding: 0.65rem 0.85rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.02);
+    :host-context(.dark) & {
+      color: $gray-400;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom-color: rgba(255, 255, 255, 0.06);
+    }
+  }
+
+  tbody {
+    th { text-align: left; padding: 0.6rem 0.85rem; font-weight: 600; }
+    td { padding: 0.6rem 0.85rem; }
+    tr { border-bottom: 1px solid rgba(0, 0, 0, 0.04); }
+    :host-context(.dark) & tr { border-bottom-color: rgba(255, 255, 255, 0.04); }
+  }
+}
+
+// ==== Print area / Reporte exportable ==================================
+.print-area {
+  background: #ffffff;
+  color: #111111;
+  border-radius: $radius-xl;
+  padding: 2rem 2.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+
+  :host-context(.dark) & {
+    // En dark mode mantenemos el reporte con fondo blanco para que se vea
+    // igual al exportar (los PDFs deben tener fondo blanco profesional).
+    background: #ffffff;
+    color: #111111;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.print-header {
+  border-bottom: 2px solid $brand-500;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin: 0;
+    color: $brand-700;
+    font-size: $text-2xl;
+  }
+}
+
+.print-meta {
+  margin: 0.4rem 0 0 0;
+  color: #555;
+  font-family: $font-mono;
+  font-size: $text-xs;
+}
+
+.print-section {
+  margin-bottom: 1.75rem;
+
+  h2 {
+    font-size: $text-lg;
+    color: $brand-700;
+    border-left: 4px solid $brand-500;
+    padding-left: 0.6rem;
+    margin: 1.25rem 0 0.6rem;
+  }
+  h3 { font-size: $text-base; margin: 1rem 0 0.5rem; color: #333; }
+  p  { font-size: $text-sm;  line-height: 1.6; color: #333; }
+}
+
+.heatmap--print {
+  border: 1px solid #ccc;
+  th, td { border-color: #ccc; color: #111 !important; }
+}
+
+.print-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  font-size: $text-xs;
+  color: #666;
+  font-family: $font-mono;
+}
+
+// ==== @media print: oculta el shell, deja solo .print-area ============
+@media print {
+  // Oculta navbar, footer y toda UI no esencial
+  :host-context(.app-shell) .navbar,
+  :host-context(.app-shell) .footer { display: none !important; }
+
+  .no-print { display: none !important; }
+
+  // Fondo blanco, sin glow, sin sombras
+  .viz-cmd {
+    background: #ffffff !important;
+    color: #111111 !important;
+    padding: 0 !important;
+  }
+  .glass-panel,
+  .print-area {
+    background: #ffffff !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    color: #111111 !important;
+  }
+  // Forzar colores oscuros para texto
+  h1, h2, h3, p, td, th, li, span { color: #111111 !important; }
+  // Heatmap conserva colores de fondo
+  .heatmap__cell { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  // Velas conservan colores
+  .candle__body, .candle__wick { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+
+  @page {
+    margin: 1.5cm;
+    size: A4;
+  }
+}

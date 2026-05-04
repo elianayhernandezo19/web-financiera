@@ -1,0 +1,369 @@
+<!--
+  Patrones y Riesgo - Requerimiento 3
+  Misma estetica que Similitud (glassmorphism, paleta emerald, mono labels).
+  Sin emojis: estilo profesional academico.
+-->
+<section class="patterns-cmd">
+  <div class="cmd-container">
+
+    <!-- ============ Header ============ -->
+    <header class="section-header">
+      <h1 class="section-header__title">Patrones y clasificacion de riesgo</h1>
+      <p class="section-header__subtitle">
+        Sliding window para detectar patrones en series de precios
+        y clasificacion de activos por volatilidad anualizada.
+      </p>
+      <span class="section-header__tag">REQ.03 / SLIDING WINDOW + VOLATILIDAD</span>
+    </header>
+
+    <!-- ============ Tabs ============ -->
+    <nav class="tabs glass-panel" role="tablist" aria-label="Secciones del Requerimiento 3">
+      <button
+        class="tabs__btn"
+        [class.tabs__btn--active]="activeTab() === 'patterns'"
+        (click)="cambiarTab('patterns')"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'patterns'">
+        Deteccion de patrones
+      </button>
+      <button
+        class="tabs__btn"
+        [class.tabs__btn--active]="activeTab() === 'risk'"
+        (click)="cambiarTab('risk')"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'risk'">
+        Clasificacion de riesgo
+      </button>
+    </nav>
+
+    <!-- ===========================================================
+         TAB 1 - Deteccion de patrones
+         =========================================================== -->
+    @if (activeTab() === 'patterns') {
+
+      <div class="glass-panel">
+        <h2 class="cmd-section-title">Parametros de busqueda</h2>
+
+        <div class="control">
+          <div class="control__field">
+            <label for="patSymbol">Activo</label>
+            <select id="patSymbol" class="select"
+                    [ngModel]="selectedSymbol()"
+                    (ngModelChange)="selectedSymbol.set($event)">
+              @for (s of patternsSymbols(); track s) { <option [value]="s">{{ s }}</option> }
+            </select>
+          </div>
+
+          <div class="control__field">
+            <label for="patType">Patron</label>
+            <select id="patType" class="select"
+                    [ngModel]="selectedPatternId()"
+                    (ngModelChange)="selectedPatternId.set($event)">
+              @for (p of availablePatterns(); track p.id) { <option [value]="p.id">{{ p.name }}</option> }
+            </select>
+          </div>
+
+          <!-- Parametros condicionales segun el patron -->
+          @if (selectedPatternId() === 'streak-up') {
+            <div class="control__field">
+              <label for="minLen">Longitud minima</label>
+              <input id="minLen" type="number" min="2" class="select"
+                     [ngModel]="paramMinLength()"
+                     (ngModelChange)="paramMinLength.set($event)">
+            </div>
+            <div class="control__field"><label></label><span></span></div>
+          } @else if (selectedPatternId() === 'v-reversal') {
+            <div class="control__field">
+              <label for="dDays">Dias de caida (N)</label>
+              <input id="dDays" type="number" min="1" class="select"
+                     [ngModel]="paramDownDays()"
+                     (ngModelChange)="paramDownDays.set($event)">
+            </div>
+            <div class="control__field">
+              <label for="uDays">Dias de subida (M)</label>
+              <input id="uDays" type="number" min="1" class="select"
+                     [ngModel]="paramUpDays()"
+                     (ngModelChange)="paramUpDays.set($event)">
+            </div>
+            <div class="control__field">
+              <label for="mMag">Magnitud minima</label>
+              <input id="mMag" type="number" min="0" step="0.01" class="select"
+                     [ngModel]="paramMinMagnitude()"
+                     (ngModelChange)="paramMinMagnitude.set($event)">
+            </div>
+          }
+
+          <button class="btn-primary" (click)="detectarPatron()" [disabled]="patternLoading()">
+            @if (patternLoading()) {
+              <span class="btn-primary__spinner"></span> Detectando...
+            } @else {
+              Detectar
+            }
+          </button>
+        </div>
+
+        @if (selectedPattern(); as meta) {
+          <div class="pattern-info">
+            <p class="pattern-info__desc">{{ meta.description }}</p>
+            <details class="pattern-info__formal">
+              <summary>Definicion formal y complejidad</summary>
+              <p><strong>Definicion formal:</strong> <code>{{ meta.formalDefinition }}</code></p>
+              <p>
+                <strong>Complejidad:</strong>
+                tiempo <code>{{ meta.complexity.time }}</code>,
+                espacio <code>{{ meta.complexity.space }}</code>
+                @if (meta.complexity.notes) { ({{ meta.complexity.notes }}) }
+              </p>
+            </details>
+          </div>
+        }
+      </div>
+
+      @if (patternError()) {
+        <div class="error-banner">{{ patternError() }}</div>
+      }
+
+      @if (patternResult(); as r) {
+        <!-- Chart de la serie completa -->
+        <div class="glass-panel chart-panel">
+          <header class="chart-panel__head">
+            <h2><span>{{ r.symbol }}</span> - serie de cierre completa</h2>
+            <span class="chart-panel__meta">
+              n = {{ r.seriesSize }} pts &middot; ocurrencias = {{ r.occurrencesCount }}
+              &middot; tiempo = {{ r.executionTimeMs | number:'1.3-3' }} ms
+            </span>
+          </header>
+          <div class="chart-panel__body">
+            <canvas baseChart
+                    type="line"
+                    [data]="patternChartData()"
+                    [options]="patternChartOptions()">
+            </canvas>
+          </div>
+        </div>
+
+        <!-- Listado de ocurrencias -->
+        <h2 class="cmd-section-title">Ocurrencias detectadas ({{ r.occurrencesCount }})</h2>
+
+        @if (r.occurrencesCount === 0) {
+          <div class="glass-panel empty-state">
+            No se encontraron ocurrencias con los parametros indicados.
+            Prueba relajar el umbral (longitud minima o magnitud).
+          </div>
+        } @else if (selectedPatternId() === 'streak-up') {
+
+          <div class="glass-panel table-panel">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Inicio</th>
+                  <th>Fin</th>
+                  <th>Longitud</th>
+                  <th>Precio inicio</th>
+                  <th>Precio fin</th>
+                  <th>Ganancia</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (o of r.occurrences; track trackOcc($index); let i = $index) {
+                  <tr>
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ $any(o).startDate }}</td>
+                    <td>{{ $any(o).endDate }}</td>
+                    <td><span class="metric-cell">{{ $any(o).length }} dias</span></td>
+                    <td>{{ $any(o).startPrice | number:'1.2-4' }}</td>
+                    <td>{{ $any(o).endPrice | number:'1.2-4' }}</td>
+                    <td><span class="metric-cell metric-cell--positive">
+                      +{{ $any(o).gainPct | number:'1.2-2' }}%
+                    </span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+        } @else if (selectedPatternId() === 'v-reversal') {
+
+          <div class="glass-panel table-panel">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Fondo (fecha)</th>
+                  <th>Inicio</th>
+                  <th>Fin</th>
+                  <th>Precio fondo</th>
+                  <th>Caida</th>
+                  <th>Recuperacion</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (o of r.occurrences; track trackOcc($index); let i = $index) {
+                  <tr>
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ $any(o).bottomDate }}</td>
+                    <td>{{ $any(o).startDate }}</td>
+                    <td>{{ $any(o).endDate }}</td>
+                    <td>{{ $any(o).bottomPrice | number:'1.2-4' }}</td>
+                    <td><span class="metric-cell metric-cell--negative">
+                      -{{ $any(o).dropPct | number:'1.2-2' }}%
+                    </span></td>
+                    <td><span class="metric-cell metric-cell--positive">
+                      +{{ $any(o).recoveryPct | number:'1.2-2' }}%
+                    </span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+        }
+
+      } @else if (!patternLoading() && !patternError()) {
+        <div class="glass-panel empty-state">
+          Selecciona un activo, un patron y los parametros, luego pulsa
+          <strong>Detectar</strong> para iniciar el analisis.
+        </div>
+      }
+
+    }
+
+    <!-- ===========================================================
+         TAB 2 - Clasificacion de riesgo
+         =========================================================== -->
+    @if (activeTab() === 'risk') {
+
+      <div class="glass-panel">
+        <h2 class="cmd-section-title">Parametros del ranking</h2>
+
+        <div class="control">
+          <div class="control__field">
+            <label for="rMinDays">Historial minimo (dias)</label>
+            <input id="rMinDays" type="number" min="2" class="select"
+                   [ngModel]="riskMinDays()"
+                   (ngModelChange)="riskMinDays.set($event)">
+          </div>
+
+          <div class="control__field">
+            <label>Orden</label>
+            <div class="control__radios">
+              <label>
+                <input type="radio" name="rOrder" value="desc"
+                       [checked]="riskOrder()==='desc'"
+                       (change)="riskOrder.set('desc')">
+                Mas riesgoso primero
+              </label>
+              <label>
+                <input type="radio" name="rOrder" value="asc"
+                       [checked]="riskOrder()==='asc'"
+                       (change)="riskOrder.set('asc')">
+                Mas conservador primero
+              </label>
+            </div>
+          </div>
+
+          <div class="control__field">
+            <label>Filtrar por categoria</label>
+            <select class="select"
+                    [ngModel]="riskFilter()"
+                    (ngModelChange)="riskFilter.set($event)">
+              <option value="all">Todas</option>
+              <option value="conservador">Solo Conservadores</option>
+              <option value="moderado">Solo Moderados</option>
+              <option value="agresivo">Solo Agresivos</option>
+            </select>
+          </div>
+
+          <button class="btn-primary" (click)="cargarRanking()" [disabled]="riskLoading()">
+            @if (riskLoading()) {
+              <span class="btn-primary__spinner"></span> Calculando...
+            } @else {
+              Recalcular
+            }
+          </button>
+        </div>
+      </div>
+
+      @if (riskError()) {
+        <div class="error-banner">{{ riskError() }}</div>
+      }
+
+      @if (riskResult(); as r) {
+        <!-- Resumen por categoria -->
+        <div class="risk-summary">
+          <div class="risk-card risk-card--conservador">
+            <span class="risk-card__label">Conservadores</span>
+            <span class="risk-card__value">{{ r.totals.conservador }}</span>
+            <span class="risk-card__hint">&sigma; anual &lt; {{ r.thresholds.conservative * 100 }}%</span>
+          </div>
+          <div class="risk-card risk-card--moderado">
+            <span class="risk-card__label">Moderados</span>
+            <span class="risk-card__value">{{ r.totals.moderado }}</span>
+            <span class="risk-card__hint">
+              {{ r.thresholds.conservative * 100 }}% &le; &sigma; &lt; {{ r.thresholds.moderate * 100 }}%
+            </span>
+          </div>
+          <div class="risk-card risk-card--agresivo">
+            <span class="risk-card__label">Agresivos</span>
+            <span class="risk-card__value">{{ r.totals.agresivo }}</span>
+            <span class="risk-card__hint">&sigma; anual &ge; {{ r.thresholds.moderate * 100 }}%</span>
+          </div>
+          <div class="risk-card risk-card--total">
+            <span class="risk-card__label">Total analizados</span>
+            <span class="risk-card__value">{{ r.totalAssets }}</span>
+            <span class="risk-card__hint">tiempo: {{ r.executionTimeMs | number:'1.2-2' }} ms</span>
+          </div>
+        </div>
+
+        <!-- Tabla de ranking -->
+        <h2 class="cmd-section-title">
+          Ranking de activos ({{ filteredRanking().length }} de {{ r.totalAssets }})
+        </h2>
+
+        <div class="glass-panel table-panel">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Activo</th>
+                <th>Fuente</th>
+                <th>Periodo</th>
+                <th>n retornos</th>
+                <th>&sigma; diaria</th>
+                <th>&sigma; anualizada</th>
+                <th>Categoria</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of filteredRanking(); track trackRanking($index, item); let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td><strong>{{ item.symbol }}</strong></td>
+                  <td><span class="metric-cell metric-cell--small">{{ item.source }}</span></td>
+                  <td><span class="metric-cell metric-cell--small">
+                    {{ item.firstDate }} &rarr; {{ item.lastDate }}
+                  </span></td>
+                  <td>{{ item.n }}</td>
+                  <td>{{ item.stdDev * 100 | number:'1.3-3' }}%</td>
+                  <td><strong>{{ item.annualizedPct | number:'1.2-2' }}%</strong></td>
+                  <td>
+                    <span class="badge" [class]="categoriaClass(item.category)">
+                      {{ item.categoryLabel }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else if (!riskLoading() && !riskError()) {
+        <div class="glass-panel empty-state">
+          Pulsa <strong>Recalcular</strong> para generar el ranking de riesgo.
+        </div>
+      }
+
+    }
+
+  </div>
+</section>

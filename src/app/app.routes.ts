@@ -25,6 +25,30 @@ export const routes: Routes = [
       ),
     title: 'Explorador de Algoritmos — Análisis de Algoritmos · UQ',
   },
+  {
+    path: 'similarity',
+    loadComponent: () =>
+      import('./features/similarity/similarity.component').then(
+        (m) => m.SimilarityComponent,
+      ),
+    title: 'Similitud de Series — Requerimiento 2 · UQ',
+  },
+  {
+    path: 'patterns',
+    loadComponent: () =>
+      import('./features/patterns/patterns.component').then(
+        (m) => m.PatternsComponent,
+      ),
+    title: 'Patrones y Riesgo — Requerimiento 3 · UQ',
+  },
+  {
+    path: 'visualization',
+    loadComponent: () =>
+      import('./features/visualization/visualization.component').then(
+        (m) => m.VisualizationComponent,
+      ),
+    title: 'Visualización Bursátil — Requerimiento 4 · UQ',
+  },
   // Catch-all: redirige rutas desconocidas al dashboard
   { path: '**', redirectTo: 'dashboard' },
 ];
