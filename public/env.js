@@ -10,5 +10,5 @@
 // (empieza por '$') y aplica el fallback automaticamente.
 (function (w) {
   w.__env = w.__env || {};
-  w.__env['API_URL'] = 'http://localhost:3000/api/v1';
+  w.__env['API_URL'] = 'http://api-financiera-ok.eba-jbfneuk2.us-east-1.elasticbeanstalk.com/api/v1';
 }(window));
