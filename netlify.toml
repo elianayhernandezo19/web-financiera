@@ -1,0 +1,10 @@
+[[redirects]]
+  from = "/api/*"
+  to = "http://api-financiera-ok.eba-jbfneuk2.us-east-1.elasticbeanstalk.com/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
