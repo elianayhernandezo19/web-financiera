@@ -1,0 +1,89 @@
+<section class="referencias-page">
+
+  <!-- ── Header ── -->
+  <div class="page-header">
+    <div class="page-header__icon">📚</div>
+    <div>
+      <h1 class="page-header__title">Referencias y Fuentes</h1>
+      <p class="page-header__subtitle">
+        Fuentes de datos, infraestructura utilizada y recursos educativos para los 12 algoritmos del proyecto.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Fuentes de Datos e Infraestructura ── -->
+  @for (category of categories; track category) {
+    <div class="section">
+      <h2 class="section__title">
+        @if (category === 'Datos Financieros') { 📊 }
+        @if (category === 'Infraestructura') { ☁️ }
+        @if (category === 'Referencias Académicas') { 📖 }
+        {{ category }}
+      </h2>
+      <div class="cards-grid">
+        @for (source of getSourcesByCategory(category); track source.name) {
+          <a class="source-card" [href]="source.url" target="_blank" rel="noopener noreferrer">
+            <div class="source-card__icon">{{ source.icon }}</div>
+            <div class="source-card__body">
+              <h3 class="source-card__name">{{ source.name }}</h3>
+              <p class="source-card__desc">{{ source.description }}</p>
+            </div>
+            <div class="source-card__link">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+              </svg>
+              Visitar sitio
+            </div>
+          </a>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ── Videos por Algoritmo ── -->
+  <div class="section">
+    <h2 class="section__title">🎬 Videos Educativos — 12 Algoritmos</h2>
+    <p class="section__subtitle">
+      Recursos en YouTube y documentación técnica para cada algoritmo implementado en el proyecto.
+    </p>
+    <div class="algo-grid">
+      @for (algo of algorithms; track algo.id) {
+        <div class="algo-card">
+          <div class="algo-card__header">
+            <span class="algo-card__name">{{ algo.name }}</span>
+          </div>
+          <div class="algo-card__links">
+            <a [href]="algo.youtubeSearch" target="_blank" rel="noopener noreferrer" class="algo-link algo-link--yt">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+              Ver en YouTube
+            </a>
+            <a [href]="algo.geeksUrl" target="_blank" rel="noopener noreferrer" class="algo-link algo-link--gfg">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/>
+              </svg>
+              GeeksForGeeks
+            </a>
+            <a [href]="algo.wikipedia" target="_blank" rel="noopener noreferrer" class="algo-link algo-link--wiki">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+              </svg>
+              Wikipedia
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ── Footer académico ── -->
+  <div class="academic-footer">
+    <p>
+      Proyecto desarrollado para la asignatura <strong>Análisis de Algoritmos</strong> —
+      <strong>Universidad del Quindío</strong> · Ingeniería de Sistemas · 2026-1
+    </p>
+  </div>
+
+</section>

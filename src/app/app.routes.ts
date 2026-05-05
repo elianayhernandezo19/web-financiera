@@ -49,6 +49,14 @@ export const routes: Routes = [
       ),
     title: 'Visualización Bursátil — Requerimiento 4 · UQ',
   },
+  {
+    path: 'referencias',
+    loadComponent: () =>
+      import('./features/referencias/referencias.component').then(
+        (m) => m.ReferenciasComponent,
+      ),
+    title: 'Referencias y Fuentes — Análisis de Algoritmos · UQ',
+  },
   // Catch-all: redirige rutas desconocidas al dashboard
   { path: '**', redirectTo: 'dashboard' },
 ];
